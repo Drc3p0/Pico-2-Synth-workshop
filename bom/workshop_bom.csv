@@ -1,0 +1,15 @@
+Part Name,Qty Per Student,Unit Cost (USD),Notes
+Raspberry Pi Pico 2 (RP2350),1,5.00,Microcontroller with dual-core ARM Cortex-M33
+Half-size Breadboard,1,2.00,400-point solderless breadboard
+Tactile Push Button (6mm),4,0.10,Momentary contact switches for input
+10kΩ Linear Potentiometer (B10K),2,0.50,Analog input for parameter control
+Light Dependent Resistor (LDR),1,0.30,Photoresistor for light-sensitive effects
+10kΩ Resistor (1/4W),1,0.05,For LDR voltage divider circuit
+Speaker/Piezo Buzzer (8Ω 0.5W),1,1.00,Audio output element
+Jumper Wires (M-M pack of 10),1,0.50,Breadboard connections
+USB-C Cable (data-capable),1,2.00,Programming and power delivery
+VL53L0X ToF Sensor Breakout (Optional),1,10.00,Time-of-flight distance sensor for advanced projects
+100Ω Resistor (1/4W) (Optional),1,0.05,RC filter component for audio
+10μF Capacitor (Optional),1,0.05,RC filter component for audio
+Per 50 Students (Basic Kit),50,11.45,Total cost for 50 basic kits
+Per 50 Students (Deluxe Kit with ToF),50,21.55,Total cost for 50 deluxe kits with optional sensor

@@ -1,0 +1,106 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#333"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#3498DB"/>
+    </marker>
+  </defs>
+  <style>
+    .pin-label { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; }
+    .desc { font-family: Arial, Helvetica, sans-serif; font-size: 12px; fill: #555; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; fill: #222; }
+    .note { font-family: Arial, Helvetica, sans-serif; font-size: 10px; fill: #777; }
+    .component-label { font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; fill: #333; }
+  </style>
+  <rect width="600" height="400" fill="#fff"/>
+
+  <!-- Title -->
+  <text x="300" y="28" text-anchor="middle" class="title">Potentiometer Wiring — Analog Input</text>
+  <text x="300" y="46" text-anchor="middle" class="desc">Turn knob = voltage sweeps 0V to 3.3V on GP26 (ADC0)</text>
+
+  <!-- Pico board -->
+  <rect x="30" y="80" width="110" height="250" rx="6" fill="#1a5e1a" stroke="#0d3d0d" stroke-width="2"/>
+  <text x="85" y="110" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#fff" font-weight="bold">Pico 2</text>
+
+  <!-- 3V3 pin -->
+  <rect x="120" y="140" width="20" height="12" rx="2" fill="#C0392B"/>
+  <circle cx="150" cy="146" r="5" fill="#C0392B" stroke="#922B21" stroke-width="1"/>
+  <text x="45" y="150" text-anchor="start" class="pin-label" fill="#C0392B">3V3</text>
+
+  <!-- GP26 pin -->
+  <rect x="120" y="195" width="20" height="12" rx="2" fill="#3498DB"/>
+  <circle cx="150" cy="201" r="5" fill="#3498DB" stroke="#2980B9" stroke-width="1"/>
+  <text x="45" y="205" text-anchor="start" class="pin-label" fill="#3498DB">GP26</text>
+
+  <!-- GND pin -->
+  <rect x="120" y="260" width="20" height="12" rx="2" fill="#555"/>
+  <circle cx="150" cy="266" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <text x="45" y="270" text-anchor="start" class="pin-label" fill="#555">GND</text>
+
+  <!-- Potentiometer body -->
+  <rect x="290" y="105" width="130" height="200" rx="8" fill="#f0f0f0" stroke="#333" stroke-width="2"/>
+  <!-- Knob circle -->
+  <circle cx="355" cy="190" r="45" fill="#ddd" stroke="#999" stroke-width="2"/>
+  <circle cx="355" cy="190" r="35" fill="#ccc" stroke="#aaa" stroke-width="1.5"/>
+  <!-- Knob indicator -->
+  <line x1="355" y1="190" x2="355" y2="160" stroke="#666" stroke-width="3" stroke-linecap="round"/>
+  <!-- Rotation arrow -->
+  <path d="M330,155 a30,30 0 0,1 50,0" fill="none" stroke="#999" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <text x="355" y="88" text-anchor="middle" class="component-label">Potentiometer</text>
+  <text x="355" y="100" text-anchor="middle" class="note">(10k\u03A9 recommended)</text>
+
+  <!-- Three terminals at bottom of pot -->
+  <!-- Left terminal (3V3) -->
+  <circle cx="310" cy="305" r="5" fill="#C0392B" stroke="#922B21" stroke-width="1.5"/>
+  <text x="310" y="325" text-anchor="middle" class="note" fill="#C0392B" font-weight="bold">Pin 1</text>
+  <text x="310" y="337" text-anchor="middle" class="note" fill="#C0392B">3.3V</text>
+
+  <!-- Middle terminal (Wiper = signal) -->
+  <circle cx="355" cy="305" r="5" fill="#3498DB" stroke="#2980B9" stroke-width="1.5"/>
+  <text x="355" y="325" text-anchor="middle" class="note" fill="#3498DB" font-weight="bold">Wiper</text>
+  <text x="355" y="337" text-anchor="middle" class="note" fill="#3498DB">Signal</text>
+
+  <!-- Right terminal (GND) -->
+  <circle cx="400" cy="305" r="5" fill="#555" stroke="#333" stroke-width="1.5"/>
+  <text x="400" y="325" text-anchor="middle" class="note" fill="#555" font-weight="bold">Pin 3</text>
+  <text x="400" y="337" text-anchor="middle" class="note" fill="#555">GND</text>
+
+  <!-- Wires -->
+  <!-- 3V3 to left terminal -->
+  <line x1="155" y1="146" x2="230" y2="146" stroke="#C0392B" stroke-width="2.5"/>
+  <line x1="230" y1="146" x2="230" y2="305" stroke="#C0392B" stroke-width="2.5"/>
+  <line x1="230" y1="305" x2="305" y2="305" stroke="#C0392B" stroke-width="2.5"/>
+  <text x="218" y="225" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#C0392B">3.3V (red)</text>
+
+  <!-- GP26 to wiper (middle terminal) -->
+  <line x1="155" y1="201" x2="250" y2="201" stroke="#3498DB" stroke-width="2.5"/>
+  <line x1="250" y1="201" x2="250" y2="355" stroke="#3498DB" stroke-width="2.5"/>
+  <line x1="250" y1="355" x2="355" y2="355" stroke="#3498DB" stroke-width="2.5"/>
+  <line x1="355" y1="355" x2="355" y2="310" stroke="#3498DB" stroke-width="2.5"/>
+  <text x="302" y="367" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#3498DB">Signal (blue)</text>
+
+  <!-- GND to right terminal -->
+  <line x1="155" y1="266" x2="270" y2="266" stroke="#555" stroke-width="2.5"/>
+  <line x1="270" y1="266" x2="270" y2="375" stroke="#555" stroke-width="2.5"/>
+  <line x1="270" y1="375" x2="400" y2="375" stroke="#555" stroke-width="2.5"/>
+  <line x1="400" y1="375" x2="400" y2="310" stroke="#555" stroke-width="2.5"/>
+  <text x="335" y="388" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">Ground (black)</text>
+
+  <!-- Voltage output indicator -->
+  <rect x="440" y="120" width="150" height="85" rx="4" fill="#EBF5FB" stroke="#3498DB" stroke-width="1"/>
+  <text x="515" y="140" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333" font-weight="bold">ADC Output:</text>
+  <text x="515" y="158" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#3498DB">Full CCW = 0</text>
+  <text x="515" y="173" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#3498DB">Mid     = 32768</text>
+  <text x="515" y="188" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#3498DB">Full CW  = 65535</text>
+  <text x="515" y="200" text-anchor="middle" class="note">(16-bit range)</text>
+
+  <!-- How it works -->
+  <rect x="440" y="220" width="150" height="65" rx="4" fill="#F4F6F7" stroke="#BDC3C7" stroke-width="1"/>
+  <text x="515" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333" font-weight="bold">How it works:</text>
+  <text x="515" y="254" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">Wiper slides along</text>
+  <text x="515" y="266" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">resistive strip, dividing</text>
+  <text x="515" y="278" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">voltage between 3V3 &amp; GND</text>
+</svg>

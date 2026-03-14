@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#333"/>
+    </marker>
+  </defs>
+  <style>
+    .pin-label { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; }
+    .desc { font-family: Arial, Helvetica, sans-serif; font-size: 12px; fill: #555; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; fill: #222; }
+    .note { font-family: Arial, Helvetica, sans-serif; font-size: 10px; fill: #777; }
+    .component-label { font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; fill: #333; }
+  </style>
+  <rect width="600" height="400" fill="#fff"/>
+
+  <!-- Title -->
+  <text x="300" y="28" text-anchor="middle" class="title">LDR Voltage Divider — Light Sensor</text>
+  <text x="300" y="46" text-anchor="middle" class="desc">More light = lower LDR resistance = higher voltage on GP28</text>
+
+  <!-- Pico board -->
+  <rect x="30" y="70" width="100" height="240" rx="6" fill="#1a5e1a" stroke="#0d3d0d" stroke-width="2"/>
+  <text x="80" y="100" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#fff" font-weight="bold">Pico 2</text>
+
+  <!-- 3V3 pin -->
+  <circle cx="140" cy="120" r="5" fill="#C0392B" stroke="#922B21" stroke-width="1"/>
+  <text x="42" y="124" text-anchor="start" class="pin-label" fill="#C0392B">3V3</text>
+
+  <!-- GP28 pin -->
+  <circle cx="140" cy="190" r="5" fill="#3498DB" stroke="#2980B9" stroke-width="1"/>
+  <text x="42" y="194" text-anchor="start" class="pin-label" fill="#3498DB">GP28</text>
+
+  <!-- GND pin -->
+  <circle cx="140" cy="260" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <text x="42" y="264" text-anchor="start" class="pin-label" fill="#555">GND</text>
+
+  <!-- Schematic layout - vertical voltage divider -->
+  <!-- 3V3 rail (top) -->
+  <line x1="145" y1="120" x2="340" y2="120" stroke="#C0392B" stroke-width="2.5"/>
+  <text x="340" y="112" text-anchor="middle" class="pin-label" fill="#C0392B">3.3V</text>
+
+  <!-- 3V3 rail down to LDR -->
+  <line x1="340" y1="120" x2="340" y2="145" stroke="#C0392B" stroke-width="2"/>
+
+  <!-- LDR component -->
+  <rect x="315" y="145" width="50" height="55" rx="6" fill="#FFF9E6" stroke="#F39C12" stroke-width="2"/>
+  <!-- LDR circle symbol -->
+  <circle cx="340" cy="172" r="16" fill="none" stroke="#F39C12" stroke-width="1.5"/>
+  <!-- Light arrows pointing at LDR -->
+  <line x1="300" y1="158" x2="318" y2="166" stroke="#F39C12" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="300" y1="172" x2="318" y2="172" stroke="#F39C12" stroke-width="1.5" marker-end="url(#arr)"/>
+  <text x="290" y="168" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#F39C12">Light</text>
+  <text x="340" y="215" text-anchor="middle" class="component-label">LDR</text>
+  <text x="340" y="228" text-anchor="middle" class="note">(Light Dependent</text>
+  <text x="340" y="239" text-anchor="middle" class="note">Resistor)</text>
+
+  <!-- LDR to junction -->
+  <line x1="340" y1="200" x2="340" y2="260" stroke="#333" stroke-width="2"/>
+
+  <!-- Junction point (where wire goes to GP28) -->
+  <circle cx="340" cy="260" r="5" fill="#3498DB" stroke="#2980B9" stroke-width="2"/>
+  <text x="352" y="255" text-anchor="start" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#3498DB" font-weight="bold">Junction</text>
+
+  <!-- Wire from junction to GP28 -->
+  <line x1="335" y1="260" x2="200" y2="260" stroke="#3498DB" stroke-width="2.5"/>
+  <line x1="200" y1="260" x2="200" y2="190" stroke="#3498DB" stroke-width="2.5"/>
+  <line x1="200" y1="190" x2="145" y2="190" stroke="#3498DB" stroke-width="2.5"/>
+  <text x="200" y="225" text-anchor="end" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#3498DB">Signal to ADC2</text>
+
+  <!-- Junction to 10k resistor -->
+  <line x1="340" y1="265" x2="340" y2="285" stroke="#333" stroke-width="2"/>
+
+  <!-- 10k Resistor (schematic zigzag) -->
+  <rect x="325" y="285" width="30" height="50" rx="2" fill="#F4F6F7" stroke="#333" stroke-width="1.5"/>
+  <text x="340" y="313" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#333">10k</text>
+  <!-- Resistor bands (decorative) -->
+  <line x1="327" y1="295" x2="353" y2="295" stroke="#8B4513" stroke-width="2"/>
+  <line x1="327" y1="300" x2="353" y2="300" stroke="#333" stroke-width="2"/>
+  <line x1="327" y1="305" x2="353" y2="305" stroke="#F39C12" stroke-width="2"/>
+  <text x="340" y="350" text-anchor="middle" class="component-label">10k\u03A9 Resistor</text>
+
+  <!-- Resistor to GND -->
+  <line x1="340" y1="335" x2="340" y2="360" stroke="#555" stroke-width="2"/>
+
+  <!-- GND wire -->
+  <line x1="340" y1="360" x2="180" y2="360" stroke="#555" stroke-width="2.5"/>
+  <line x1="180" y1="360" x2="180" y2="260" stroke="#555" stroke-width="2.5"/>
+  <line x1="180" y1="260" x2="145" y2="260" stroke="#555" stroke-width="2.5"/>
+
+  <!-- GND symbol -->
+  <line x1="340" y1="360" x2="340" y2="375" stroke="#555" stroke-width="2"/>
+  <line x1="328" y1="375" x2="352" y2="375" stroke="#555" stroke-width="2"/>
+  <line x1="332" y1="380" x2="348" y2="380" stroke="#555" stroke-width="1.5"/>
+  <line x1="336" y1="385" x2="344" y2="385" stroke="#555" stroke-width="1"/>
+  <text x="340" y="397" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+
+  <!-- Info box: How it works -->
+  <rect x="410" y="70" width="180" height="120" rx="4" fill="#EBF5FB" stroke="#3498DB" stroke-width="1"/>
+  <text x="500" y="90" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333" font-weight="bold">Voltage Divider</text>
+  <text x="500" y="108" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#555">V_out = 3.3V ×</text>
+  <text x="500" y="122" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#3498DB">10k / (LDR + 10k)</text>
+  <line x1="420" y1="132" x2="580" y2="132" stroke="#ddd" stroke-width="1"/>
+  <text x="500" y="148" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">Bright light: LDR ~ 1k\u03A9</text>
+  <text x="500" y="161" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#2ECC71">V_out ~ 3.0V (HIGH)</text>
+  <text x="500" y="176" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">Dark: LDR ~ 100k\u03A9</text>
+  <text x="500" y="189" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#E74C3C">V_out ~ 0.3V (LOW)</text>
+
+  <!-- Info box: ADC reading -->
+  <rect x="410" y="205" width="180" height="55" rx="4" fill="#F4F6F7" stroke="#BDC3C7" stroke-width="1"/>
+  <text x="500" y="223" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333" font-weight="bold">ADC Reading (16-bit):</text>
+  <text x="500" y="240" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#3498DB">0 (dark) to 65535 (bright)</text>
+  <text x="500" y="253" text-anchor="middle" class="note">analogio.AnalogIn(GP28)</text>
+
+  <!-- Circuit diagram label -->
+  <rect x="410" y="280" width="180" height="45" rx="4" fill="#FEF9E7" stroke="#F39C12" stroke-width="1"/>
+  <text x="500" y="298" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333" font-weight="bold">Why 10k\u03A9?</text>
+  <text x="500" y="313" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">Matches LDR mid-range for</text>
+  <text x="500" y="323" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">best sensitivity in room light</text>
+</svg>

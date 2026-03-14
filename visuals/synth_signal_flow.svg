@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300">
+  <defs>
+    <marker id="flow-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="flow-arrow-gold" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#F39C12"/>
+    </marker>
+  </defs>
+  <style>
+    .block-title { font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; fill: #fff; }
+    .block-detail { font-family: 'Courier New', monospace; font-size: 9px; fill: #fff; opacity: 0.85; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; fill: #222; }
+    .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 10px; fill: #666; }
+    .arrow-label { font-family: Arial, Helvetica, sans-serif; font-size: 8px; fill: #555; }
+  </style>
+  <rect width="900" height="300" fill="#fff"/>
+
+  <!-- Title -->
+  <text x="450" y="25" text-anchor="middle" class="title">Synth Mode — Signal Flow</text>
+  <text x="450" y="40" text-anchor="middle" class="subtitle">Hardware inputs \u2192 synthio engine \u2192 effects \u2192 speaker output</text>
+
+  <!-- ========== BLOCK 1: INPUTS ========== -->
+  <rect x="20" y="60" width="120" height="170" rx="4" fill="#555" stroke="#333" stroke-width="2"/>
+  <text x="80" y="82" text-anchor="middle" class="block-title">Hardware</text>
+  <text x="80" y="95" text-anchor="middle" class="block-title">Inputs</text>
+
+  <!-- Input sub-items -->
+  <rect x="30" y="105" width="100" height="22" rx="3" fill="#E74C3C" opacity="0.9"/>
+  <text x="80" y="120" text-anchor="middle" class="block-detail">4 Buttons</text>
+  <rect x="30" y="132" width="100" height="22" rx="3" fill="#3498DB" opacity="0.9"/>
+  <text x="80" y="147" text-anchor="middle" class="block-detail">2 Pots (ADC)</text>
+  <rect x="30" y="159" width="100" height="22" rx="3" fill="#3498DB" opacity="0.9"/>
+  <text x="80" y="174" text-anchor="middle" class="block-detail">LDR (ADC)</text>
+  <rect x="30" y="186" width="100" height="22" rx="3" fill="#2ECC71" opacity="0.9"/>
+  <text x="80" y="201" text-anchor="middle" class="block-detail">VL53L0X (opt)</text>
+
+  <!-- Arrow 1 -->
+  <line x1="140" y1="145" x2="168" y2="145" stroke="#333" stroke-width="2" marker-end="url(#flow-arrow)"/>
+  <text x="154" y="138" text-anchor="middle" class="arrow-label">read</text>
+
+  <!-- ========== BLOCK 2: INPUT READER ========== -->
+  <rect x="175" y="85" width="105" height="120" rx="4" fill="#8E44AD" stroke="#6C3483" stroke-width="2"/>
+  <text x="227" y="110" text-anchor="middle" class="block-title">Input</text>
+  <text x="227" y="125" text-anchor="middle" class="block-title">Reader</text>
+  <text x="227" y="148" text-anchor="middle" class="block-detail">inputs.py</text>
+  <text x="227" y="163" text-anchor="middle" class="block-detail">Debounce</text>
+  <text x="227" y="178" text-anchor="middle" class="block-detail">Smoothing</text>
+  <text x="227" y="193" text-anchor="middle" class="block-detail">Mapping</text>
+
+  <!-- Arrow 2 -->
+  <line x1="280" y1="145" x2="308" y2="145" stroke="#333" stroke-width="2" marker-end="url(#flow-arrow)"/>
+  <text x="294" y="138" text-anchor="middle" class="arrow-label">events</text>
+
+  <!-- ========== BLOCK 3: SYNTHIO ========== -->
+  <rect x="315" y="75" width="120" height="140" rx="4" fill="#2980B9" stroke="#1F618D" stroke-width="2"/>
+  <text x="375" y="97" text-anchor="middle" class="block-title">synthio</text>
+  <text x="375" y="112" text-anchor="middle" class="block-title">Engine</text>
+
+  <rect x="325" y="120" width="100" height="18" rx="2" fill="#1F618D"/>
+  <text x="375" y="133" text-anchor="middle" class="block-detail">Notes (pitch)</text>
+  <rect x="325" y="142" width="100" height="18" rx="2" fill="#1F618D"/>
+  <text x="375" y="155" text-anchor="middle" class="block-detail">LFOs (wobble)</text>
+  <rect x="325" y="164" width="100" height="18" rx="2" fill="#1F618D"/>
+  <text x="375" y="177" text-anchor="middle" class="block-detail">Envelopes</text>
+  <rect x="325" y="186" width="100" height="18" rx="2" fill="#1F618D"/>
+  <text x="375" y="199" text-anchor="middle" class="block-detail">Waveforms</text>
+
+  <!-- Arrow 3 -->
+  <line x1="435" y1="145" x2="463" y2="145" stroke="#333" stroke-width="2" marker-end="url(#flow-arrow)"/>
+  <text x="449" y="138" text-anchor="middle" class="arrow-label">audio</text>
+
+  <!-- ========== BLOCK 4: EFFECTS CHAIN ========== -->
+  <rect x="470" y="80" width="190" height="130" rx="4" fill="#E67E22" stroke="#CA6F1E" stroke-width="2"/>
+  <text x="565" y="102" text-anchor="middle" class="block-title">Effects Chain (fx.py)</text>
+
+  <!-- Effect sub-blocks in series -->
+  <rect x="480" y="112" width="55" height="35" rx="3" fill="#CA6F1E"/>
+  <text x="507" y="127" text-anchor="middle" class="block-detail">Distortion</text>
+  <text x="507" y="139" text-anchor="middle" class="block-detail">waveshape</text>
+
+  <line x1="535" y1="130" x2="545" y2="130" stroke="#fff" stroke-width="1.5" marker-end="url(#flow-arrow-gold)"/>
+
+  <rect x="548" y="112" width="50" height="35" rx="3" fill="#CA6F1E"/>
+  <text x="573" y="127" text-anchor="middle" class="block-detail">Echo</text>
+  <text x="573" y="139" text-anchor="middle" class="block-detail">delay</text>
+
+  <line x1="598" y1="130" x2="608" y2="130" stroke="#fff" stroke-width="1.5" marker-end="url(#flow-arrow-gold)"/>
+
+  <rect x="611" y="112" width="42" height="35" rx="3" fill="#CA6F1E"/>
+  <text x="632" y="127" text-anchor="middle" class="block-detail">Reverb</text>
+  <text x="632" y="139" text-anchor="middle" class="block-detail">space</text>
+
+  <text x="565" y="172" text-anchor="middle" class="block-detail">Pot A = FX param</text>
+  <text x="565" y="186" text-anchor="middle" class="block-detail">Pot B = Mix/Depth</text>
+  <text x="565" y="200" text-anchor="middle" class="block-detail">LDR = Modulation</text>
+
+  <!-- Arrow 4 -->
+  <line x1="660" y1="145" x2="688" y2="145" stroke="#333" stroke-width="2" marker-end="url(#flow-arrow)"/>
+  <text x="674" y="138" text-anchor="middle" class="arrow-label">mix</text>
+
+  <!-- ========== BLOCK 5: MIXER ========== -->
+  <rect x="695" y="100" width="70" height="90" rx="4" fill="#27AE60" stroke="#1E8449" stroke-width="2"/>
+  <text x="730" y="125" text-anchor="middle" class="block-title">Mixer</text>
+  <text x="730" y="145" text-anchor="middle" class="block-detail">Level</text>
+  <text x="730" y="160" text-anchor="middle" class="block-detail">Control</text>
+  <text x="730" y="178" text-anchor="middle" class="block-detail">audiomixer</text>
+
+  <!-- Arrow 5 -->
+  <line x1="765" y1="145" x2="793" y2="145" stroke="#333" stroke-width="2" marker-end="url(#flow-arrow)"/>
+  <text x="779" y="138" text-anchor="middle" class="arrow-label">PWM</text>
+
+  <!-- ========== BLOCK 6: OUTPUT ========== -->
+  <rect x="800" y="90" width="85" height="110" rx="4" fill="#F39C12" stroke="#E67E22" stroke-width="2"/>
+  <text x="842" y="115" text-anchor="middle" class="block-title">PWM</text>
+  <text x="842" y="130" text-anchor="middle" class="block-title">Audio Out</text>
+
+  <text x="842" y="152" text-anchor="middle" class="block-detail">GP15</text>
+
+  <!-- Speaker icon -->
+  <rect x="820" y="162" width="15" height="20" rx="1" fill="#fff" opacity="0.8"/>
+  <polygon points="835,155 855,142 855,192 835,182" fill="#fff" opacity="0.8"/>
+  <!-- Sound waves -->
+  <path d="M858,157 a10,10 0 0,1 0,20" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.7"/>
+  <path d="M862,152 a15,15 0 0,1 0,30" fill="none" stroke="#fff" stroke-width="1.5" opacity="0.5"/>
+
+  <!-- Bottom description -->
+  <rect x="20" y="248" width="860" height="42" rx="4" fill="#F4F6F7" stroke="#BDC3C7" stroke-width="1"/>
+  <text x="450" y="265" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333" font-weight="bold">Signal Path Summary</text>
+  <text x="450" y="280" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">Physical inputs are read \u2192 mapped to synthio parameters \u2192 passed through configurable effects \u2192 mixed and output as PWM audio on GP15</text>
+</svg>

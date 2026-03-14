@@ -1,0 +1,3 @@
+Raspberry Pi Pico 2 Music Workshop
+
+In this hands-on workshop, you'll design and build a working synthesizer using the Raspberry Pi Pico 2 microcontroller. Starting with breadboard circuits and analog sensors, you'll learn how to read potentiometers and buttons, generate audio waveforms, and control sound in real time. By the end of the session, you'll have a fully functional instrument that responds to your touch and light. We'll cover embedded systems fundamentals, analog-to-digital conversion, and digital audio synthesis—all while making music. Bring a laptop with USB-C (we'll provide cables). All hardware is provided; no soldering required. Open to beginners and experienced makers alike.

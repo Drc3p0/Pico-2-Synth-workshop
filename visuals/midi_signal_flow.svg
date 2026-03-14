@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 300" width="900" height="300">
+  <defs>
+    <marker id="midi-arrow" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333"/>
+    </marker>
+    <marker id="midi-arrow-purple" markerWidth="10" markerHeight="7" refX="10" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#8E44AD"/>
+    </marker>
+  </defs>
+  <style>
+    .block-title { font-family: Arial, Helvetica, sans-serif; font-size: 12px; font-weight: bold; fill: #fff; }
+    .block-detail { font-family: 'Courier New', monospace; font-size: 9px; fill: #fff; opacity: 0.85; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; fill: #222; }
+    .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 10px; fill: #666; }
+    .arrow-label { font-family: Arial, Helvetica, sans-serif; font-size: 9px; fill: #555; }
+    .midi-msg { font-family: 'Courier New', monospace; font-size: 9px; fill: #8E44AD; }
+  </style>
+  <rect width="900" height="300" fill="#fff"/>
+
+  <!-- Title -->
+  <text x="450" y="25" text-anchor="middle" class="title">MIDI Mode — Signal Flow</text>
+  <text x="450" y="40" text-anchor="middle" class="subtitle">Hardware inputs \u2192 MIDI messages \u2192 USB \u2192 Computer/DAW</text>
+
+  <!-- ========== BLOCK 1: HARDWARE INPUTS ========== -->
+  <rect x="25" y="60" width="130" height="170" rx="4" fill="#555" stroke="#333" stroke-width="2"/>
+  <text x="90" y="82" text-anchor="middle" class="block-title">Hardware</text>
+  <text x="90" y="97" text-anchor="middle" class="block-title">Inputs</text>
+
+  <rect x="35" y="107" width="110" height="22" rx="3" fill="#E74C3C" opacity="0.9"/>
+  <text x="90" y="122" text-anchor="middle" class="block-detail">4 Buttons (GP2-5)</text>
+
+  <rect x="35" y="134" width="110" height="22" rx="3" fill="#3498DB" opacity="0.9"/>
+  <text x="90" y="149" text-anchor="middle" class="block-detail">Pot A (GP26)</text>
+
+  <rect x="35" y="161" width="110" height="22" rx="3" fill="#3498DB" opacity="0.9"/>
+  <text x="90" y="176" text-anchor="middle" class="block-detail">Pot B (GP27)</text>
+
+  <rect x="35" y="188" width="110" height="22" rx="3" fill="#3498DB" opacity="0.9"/>
+  <text x="90" y="203" text-anchor="middle" class="block-detail">LDR (GP28)</text>
+
+  <!-- Arrow 1 -->
+  <line x1="155" y1="145" x2="193" y2="145" stroke="#333" stroke-width="2" marker-end="url(#midi-arrow)"/>
+  <text x="174" y="138" text-anchor="middle" class="arrow-label">read</text>
+
+  <!-- ========== BLOCK 2: INPUT READER ========== -->
+  <rect x="200" y="80" width="115" height="130" rx="4" fill="#8E44AD" stroke="#6C3483" stroke-width="2"/>
+  <text x="257" y="105" text-anchor="middle" class="block-title">Input</text>
+  <text x="257" y="120" text-anchor="middle" class="block-title">Reader</text>
+
+  <text x="257" y="142" text-anchor="middle" class="block-detail">inputs.py</text>
+  <text x="257" y="157" text-anchor="middle" class="block-detail">Debounce</text>
+  <text x="257" y="172" text-anchor="middle" class="block-detail">Smoothing</text>
+  <text x="257" y="187" text-anchor="middle" class="block-detail">0-127 Mapping</text>
+  <text x="257" y="202" text-anchor="middle" class="block-detail">Change detect</text>
+
+  <!-- Arrow 2 -->
+  <line x1="315" y1="145" x2="353" y2="145" stroke="#333" stroke-width="2" marker-end="url(#midi-arrow)"/>
+  <text x="334" y="138" text-anchor="middle" class="arrow-label">events</text>
+
+  <!-- ========== BLOCK 3: MIDI MESSAGES ========== -->
+  <rect x="360" y="65" width="170" height="165" rx="4" fill="#2C3E50" stroke="#1B2631" stroke-width="2"/>
+  <text x="445" y="88" text-anchor="middle" class="block-title">MIDI Message</text>
+  <text x="445" y="103" text-anchor="middle" class="block-title">Generator</text>
+
+  <!-- Message types -->
+  <rect x="370" y="112" width="150" height="20" rx="2" fill="#1B2631"/>
+  <text x="445" y="126" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#E74C3C">NoteOn  (vel, ch)</text>
+
+  <rect x="370" y="136" width="150" height="20" rx="2" fill="#1B2631"/>
+  <text x="445" y="150" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#E74C3C">NoteOff (vel, ch)</text>
+
+  <rect x="370" y="160" width="150" height="20" rx="2" fill="#1B2631"/>
+  <text x="445" y="174" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#3498DB">CC (ctrl#, val)</text>
+
+  <rect x="370" y="184" width="150" height="20" rx="2" fill="#1B2631"/>
+  <text x="445" y="198" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#3498DB">PitchBend (val)</text>
+
+  <text x="445" y="222" text-anchor="middle" class="block-detail">Buttons \u2192 Notes</text>
+  <text x="445" y="224" text-anchor="middle" class="block-detail"></text>
+
+  <!-- Arrow 3 -->
+  <line x1="530" y1="145" x2="568" y2="145" stroke="#333" stroke-width="2" marker-end="url(#midi-arrow)"/>
+  <text x="549" y="138" text-anchor="middle" class="arrow-label">bytes</text>
+
+  <!-- ========== BLOCK 4: USB MIDI ========== -->
+  <rect x="575" y="85" width="110" height="120" rx="4" fill="#8E44AD" stroke="#6C3483" stroke-width="2"/>
+  <text x="630" y="110" text-anchor="middle" class="block-title">USB MIDI</text>
+
+  <!-- USB icon -->
+  <rect x="610" y="120" width="40" height="20" rx="3" fill="#6C3483"/>
+  <text x="630" y="134" text-anchor="middle" font-family="'Courier New', monospace" font-size="8" fill="#fff">USB</text>
+
+  <text x="630" y="162" text-anchor="middle" class="block-detail">usb_midi</text>
+  <text x="630" y="177" text-anchor="middle" class="block-detail">adafruit_midi</text>
+  <text x="630" y="192" text-anchor="middle" class="block-detail">class-compliant</text>
+
+  <!-- Arrow 4 (USB cable visual) -->
+  <line x1="685" y1="145" x2="700" y2="145" stroke="#8E44AD" stroke-width="3"/>
+  <line x1="700" y1="145" x2="730" y2="145" stroke="#8E44AD" stroke-width="3" stroke-dasharray="6,3"/>
+  <line x1="730" y1="145" x2="748" y2="145" stroke="#8E44AD" stroke-width="3" marker-end="url(#midi-arrow-purple)"/>
+  <text x="717" y="138" text-anchor="middle" class="arrow-label">USB cable</text>
+
+  <!-- ========== BLOCK 5: COMPUTER/DAW ========== -->
+  <rect x="755" y="65" width="130" height="170" rx="4" fill="#34495E" stroke="#2C3E50" stroke-width="2"/>
+  <text x="820" y="88" text-anchor="middle" class="block-title">Computer</text>
+  <text x="820" y="103" text-anchor="middle" class="block-title">/ DAW</text>
+
+  <!-- Monitor icon -->
+  <rect x="790" y="112" width="60" height="40" rx="3" fill="#2C3E50" stroke="#fff" stroke-width="1.5"/>
+  <rect x="810" y="152" width="20" height="8" rx="1" fill="#fff" opacity="0.5"/>
+  <text x="820" y="135" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#fff" opacity="0.7">DAW</text>
+
+  <!-- DAW examples -->
+  <text x="820" y="178" text-anchor="middle" class="block-detail">Ableton Live</text>
+  <text x="820" y="192" text-anchor="middle" class="block-detail">GarageBand</text>
+  <text x="820" y="206" text-anchor="middle" class="block-detail">Reaper</text>
+  <text x="820" y="220" text-anchor="middle" class="block-detail">Any MIDI host</text>
+
+  <!-- Mapping table -->
+  <rect x="25" y="248" width="860" height="42" rx="4" fill="#F4F6F7" stroke="#BDC3C7" stroke-width="1"/>
+  <text x="450" y="264" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333" font-weight="bold">Default MIDI Mapping</text>
+  <text x="450" y="280" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#555">Btn1-4 \u2192 Notes C4,D4,E4,F4 | Pot A \u2192 CC1 (Mod) | Pot B \u2192 CC7 (Volume) | LDR \u2192 CC74 (Brightness)</text>
+</svg>

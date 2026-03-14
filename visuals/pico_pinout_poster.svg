@@ -1,0 +1,308 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" width="800" height="600">
+  <style>
+    .pin-label { font-family: 'Courier New', monospace; font-size: 9px; fill: #333; }
+    .pin-label-highlight { font-family: 'Courier New', monospace; font-size: 9px; font-weight: bold; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold; fill: #222; }
+    .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #555; }
+    .legend-text { font-family: Arial, Helvetica, sans-serif; font-size: 10px; fill: #333; }
+    .board-label { font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; fill: #fff; }
+    .board-sublabel { font-family: Arial, Helvetica, sans-serif; font-size: 9px; fill: #ccc; }
+  </style>
+  <rect width="800" height="600" fill="#fff"/>
+
+  <!-- Title -->
+  <text x="400" y="30" text-anchor="middle" class="title">Raspberry Pi Pico 2 — Pinout Reference</text>
+  <text x="400" y="48" text-anchor="middle" class="subtitle">Music Workshop Pin Assignments — Highlighted pins are used in this workshop</text>
+
+  <!-- Legend -->
+  <rect x="20" y="62" width="12" height="12" rx="2" fill="#E74C3C"/>
+  <text x="36" y="73" class="legend-text">Buttons (GP2-5)</text>
+  <rect x="140" y="62" width="12" height="12" rx="2" fill="#F39C12"/>
+  <text x="156" y="73" class="legend-text">Audio PWM (GP15)</text>
+  <rect x="290" y="62" width="12" height="12" rx="2" fill="#3498DB"/>
+  <text x="306" y="73" class="legend-text">ADC (GP26-28)</text>
+  <rect x="420" y="62" width="12" height="12" rx="2" fill="#2ECC71"/>
+  <text x="436" y="73" class="legend-text">I2C (GP4/5 alt)</text>
+  <rect x="550" y="62" width="12" height="12" rx="2" fill="#555"/>
+  <text x="566" y="73" class="legend-text">GND</text>
+  <rect x="630" y="62" width="12" height="12" rx="2" fill="#C0392B"/>
+  <text x="646" y="73" class="legend-text">Power (3V3/VBUS)</text>
+
+  <!-- Board body -->
+  <rect x="270" y="90" width="260" height="480" rx="8" fill="#1a5e1a" stroke="#0d3d0d" stroke-width="2"/>
+  <rect x="280" y="100" width="240" height="460" rx="4" fill="#1e6b1e" stroke="none"/>
+
+  <!-- USB connector -->
+  <rect x="365" y="82" width="70" height="20" rx="3" fill="#888" stroke="#555" stroke-width="1.5"/>
+  <text x="400" y="96" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#fff">USB</text>
+
+  <!-- Board text -->
+  <text x="400" y="140" text-anchor="middle" class="board-label">Raspberry Pi</text>
+  <text x="400" y="158" text-anchor="middle" class="board-label">Pico 2</text>
+  <text x="400" y="175" text-anchor="middle" class="board-sublabel">RP2350</text>
+
+  <!-- BOOTSEL button -->
+  <circle cx="400" cy="200" r="10" fill="#444" stroke="#333" stroke-width="1"/>
+  <text x="400" y="203" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="6" fill="#aaa">BOOT</text>
+
+  <!-- LED -->
+  <circle cx="400" cy="225" r="4" fill="#4a4" stroke="#333" stroke-width="0.5"/>
+  <text x="400" y="238" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="6" fill="#ccc">LED</text>
+
+  <!-- Pin holes - Left side (Pin 1 at top-left) -->
+  <!-- Pin positions: 20 pins on each side, spaced 22px apart starting at y=108 -->
+
+  <!-- LEFT SIDE PINS (top to bottom: Pin 1 to Pin 20) -->
+  <!-- Pin 1: GP0 -->
+  <circle cx="282" cy="108" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="101" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="111" text-anchor="middle" class="pin-label">GP0</text>
+  <text x="170" y="111" text-anchor="end" class="pin-label" fill="#999">1</text>
+
+  <!-- Pin 2: GP1 -->
+  <circle cx="282" cy="130" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="123" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="133" text-anchor="middle" class="pin-label">GP1</text>
+  <text x="170" y="133" text-anchor="end" class="pin-label" fill="#999">2</text>
+
+  <!-- Pin 3: GND -->
+  <circle cx="282" cy="152" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <rect x="175" y="145" width="95" height="14" rx="2" fill="#eee" stroke="#555" stroke-width="1"/>
+  <text x="222" y="155" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+  <text x="170" y="155" text-anchor="end" class="pin-label" fill="#999">3</text>
+
+  <!-- Pin 4: GP2 — BUTTON 1 -->
+  <circle cx="282" cy="174" r="5" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+  <rect x="175" y="167" width="95" height="14" rx="2" fill="#FDEDEC" stroke="#E74C3C" stroke-width="1.5"/>
+  <text x="222" y="177" text-anchor="middle" class="pin-label-highlight" fill="#E74C3C">GP2 BTN1</text>
+  <text x="170" y="177" text-anchor="end" class="pin-label" fill="#999">4</text>
+
+  <!-- Pin 5: GP3 — BUTTON 2 -->
+  <circle cx="282" cy="196" r="5" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+  <rect x="175" y="189" width="95" height="14" rx="2" fill="#FDEDEC" stroke="#E74C3C" stroke-width="1.5"/>
+  <text x="222" y="199" text-anchor="middle" class="pin-label-highlight" fill="#E74C3C">GP3 BTN2</text>
+  <text x="170" y="199" text-anchor="end" class="pin-label" fill="#999">5</text>
+
+  <!-- Pin 6: GP4 — BUTTON 3 / I2C SDA -->
+  <circle cx="282" cy="218" r="5" fill="#E74C3C" stroke="#2ECC71" stroke-width="2"/>
+  <rect x="145" y="211" width="125" height="14" rx="2" fill="#FDEDEC" stroke="#E74C3C" stroke-width="1"/>
+  <text x="207" y="221" text-anchor="middle" class="pin-label-highlight" fill="#E74C3C">GP4 BTN3/SDA</text>
+  <text x="140" y="221" text-anchor="end" class="pin-label" fill="#999">6</text>
+
+  <!-- Pin 7: GP5 — BUTTON 4 / I2C SCL -->
+  <circle cx="282" cy="240" r="5" fill="#E74C3C" stroke="#2ECC71" stroke-width="2"/>
+  <rect x="145" y="233" width="125" height="14" rx="2" fill="#FDEDEC" stroke="#E74C3C" stroke-width="1"/>
+  <text x="207" y="243" text-anchor="middle" class="pin-label-highlight" fill="#E74C3C">GP5 BTN4/SCL</text>
+  <text x="140" y="243" text-anchor="end" class="pin-label" fill="#999">7</text>
+
+  <!-- Pin 8: GND -->
+  <circle cx="282" cy="262" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <rect x="175" y="255" width="95" height="14" rx="2" fill="#eee" stroke="#555" stroke-width="1"/>
+  <text x="222" y="265" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+  <text x="170" y="265" text-anchor="end" class="pin-label" fill="#999">8</text>
+
+  <!-- Pin 9: GP6 -->
+  <circle cx="282" cy="284" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="277" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="287" text-anchor="middle" class="pin-label">GP6</text>
+  <text x="170" y="287" text-anchor="end" class="pin-label" fill="#999">9</text>
+
+  <!-- Pin 10: GP7 -->
+  <circle cx="282" cy="306" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="299" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="309" text-anchor="middle" class="pin-label">GP7</text>
+  <text x="170" y="309" text-anchor="end" class="pin-label" fill="#999">10</text>
+
+  <!-- Pin 11: GP8 -->
+  <circle cx="282" cy="328" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="321" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="331" text-anchor="middle" class="pin-label">GP8</text>
+  <text x="170" y="331" text-anchor="end" class="pin-label" fill="#999">11</text>
+
+  <!-- Pin 12: GP9 -->
+  <circle cx="282" cy="350" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="343" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="353" text-anchor="middle" class="pin-label">GP9</text>
+  <text x="170" y="353" text-anchor="end" class="pin-label" fill="#999">12</text>
+
+  <!-- Pin 13: GND -->
+  <circle cx="282" cy="372" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <rect x="175" y="365" width="95" height="14" rx="2" fill="#eee" stroke="#555" stroke-width="1"/>
+  <text x="222" y="375" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+  <text x="170" y="375" text-anchor="end" class="pin-label" fill="#999">13</text>
+
+  <!-- Pin 14: GP10 -->
+  <circle cx="282" cy="394" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="387" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="397" text-anchor="middle" class="pin-label">GP10</text>
+  <text x="170" y="397" text-anchor="end" class="pin-label" fill="#999">14</text>
+
+  <!-- Pin 15: GP11 -->
+  <circle cx="282" cy="416" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="409" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="419" text-anchor="middle" class="pin-label">GP11</text>
+  <text x="170" y="419" text-anchor="end" class="pin-label" fill="#999">15</text>
+
+  <!-- Pin 16: GP12 -->
+  <circle cx="282" cy="438" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="431" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="441" text-anchor="middle" class="pin-label">GP12</text>
+  <text x="170" y="441" text-anchor="end" class="pin-label" fill="#999">16</text>
+
+  <!-- Pin 17: GP13 -->
+  <circle cx="282" cy="460" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="453" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="463" text-anchor="middle" class="pin-label">GP13</text>
+  <text x="170" y="463" text-anchor="end" class="pin-label" fill="#999">17</text>
+
+  <!-- Pin 18: GND -->
+  <circle cx="282" cy="482" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <rect x="175" y="475" width="95" height="14" rx="2" fill="#eee" stroke="#555" stroke-width="1"/>
+  <text x="222" y="485" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+  <text x="170" y="485" text-anchor="end" class="pin-label" fill="#999">18</text>
+
+  <!-- Pin 19: GP14 -->
+  <circle cx="282" cy="504" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="175" y="497" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="222" y="507" text-anchor="middle" class="pin-label">GP14</text>
+  <text x="170" y="507" text-anchor="end" class="pin-label" fill="#999">19</text>
+
+  <!-- Pin 20: GP15 — AUDIO PWM -->
+  <circle cx="282" cy="526" r="5" fill="#F39C12" stroke="#E67E22" stroke-width="1"/>
+  <rect x="155" y="519" width="115" height="14" rx="2" fill="#FEF9E7" stroke="#F39C12" stroke-width="1.5"/>
+  <text x="212" y="529" text-anchor="middle" class="pin-label-highlight" fill="#E67E22">GP15 AUDIO</text>
+  <text x="150" y="529" text-anchor="end" class="pin-label" fill="#999">20</text>
+
+  <!-- RIGHT SIDE PINS (top to bottom: Pin 40 to Pin 21) -->
+  <!-- Pin 40: VBUS -->
+  <circle cx="518" cy="108" r="5" fill="#C0392B" stroke="#922B21" stroke-width="1"/>
+  <rect x="530" y="101" width="95" height="14" rx="2" fill="#F9EBEA" stroke="#C0392B" stroke-width="1"/>
+  <text x="577" y="111" text-anchor="middle" class="pin-label" fill="#C0392B">VBUS</text>
+  <text x="630" y="111" text-anchor="start" class="pin-label" fill="#999">40</text>
+
+  <!-- Pin 39: VSYS -->
+  <circle cx="518" cy="130" r="5" fill="#C0392B" stroke="#922B21" stroke-width="1"/>
+  <rect x="530" y="123" width="95" height="14" rx="2" fill="#F9EBEA" stroke="#C0392B" stroke-width="1"/>
+  <text x="577" y="133" text-anchor="middle" class="pin-label" fill="#C0392B">VSYS</text>
+  <text x="630" y="133" text-anchor="start" class="pin-label" fill="#999">39</text>
+
+  <!-- Pin 38: GND -->
+  <circle cx="518" cy="152" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <rect x="530" y="145" width="95" height="14" rx="2" fill="#eee" stroke="#555" stroke-width="1"/>
+  <text x="577" y="155" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+  <text x="630" y="155" text-anchor="start" class="pin-label" fill="#999">38</text>
+
+  <!-- Pin 37: 3V3_EN -->
+  <circle cx="518" cy="174" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="167" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="177" text-anchor="middle" class="pin-label">3V3_EN</text>
+  <text x="630" y="177" text-anchor="start" class="pin-label" fill="#999">37</text>
+
+  <!-- Pin 36: 3V3(OUT) -->
+  <circle cx="518" cy="196" r="5" fill="#C0392B" stroke="#922B21" stroke-width="1"/>
+  <rect x="530" y="189" width="95" height="14" rx="2" fill="#F9EBEA" stroke="#C0392B" stroke-width="1"/>
+  <text x="577" y="199" text-anchor="middle" class="pin-label" fill="#C0392B">3V3(OUT)</text>
+  <text x="630" y="199" text-anchor="start" class="pin-label" fill="#999">36</text>
+
+  <!-- Pin 35: ADC_VREF -->
+  <circle cx="518" cy="218" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="211" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="221" text-anchor="middle" class="pin-label">ADC_VREF</text>
+  <text x="630" y="221" text-anchor="start" class="pin-label" fill="#999">35</text>
+
+  <!-- Pin 34: GP28 — LDR (ADC2) -->
+  <circle cx="518" cy="240" r="5" fill="#3498DB" stroke="#2980B9" stroke-width="1"/>
+  <rect x="530" y="233" width="110" height="14" rx="2" fill="#EBF5FB" stroke="#3498DB" stroke-width="1.5"/>
+  <text x="585" y="243" text-anchor="middle" class="pin-label-highlight" fill="#2980B9">GP28 LDR/ADC2</text>
+  <text x="645" y="243" text-anchor="start" class="pin-label" fill="#999">34</text>
+
+  <!-- Pin 33: GND (AGND) -->
+  <circle cx="518" cy="262" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <rect x="530" y="255" width="95" height="14" rx="2" fill="#eee" stroke="#555" stroke-width="1"/>
+  <text x="577" y="265" text-anchor="middle" class="pin-label" fill="#555">AGND</text>
+  <text x="630" y="265" text-anchor="start" class="pin-label" fill="#999">33</text>
+
+  <!-- Pin 32: GP27 — POT B (ADC1) -->
+  <circle cx="518" cy="284" r="5" fill="#3498DB" stroke="#2980B9" stroke-width="1"/>
+  <rect x="530" y="277" width="115" height="14" rx="2" fill="#EBF5FB" stroke="#3498DB" stroke-width="1.5"/>
+  <text x="587" y="287" text-anchor="middle" class="pin-label-highlight" fill="#2980B9">GP27 POTB/ADC1</text>
+  <text x="650" y="287" text-anchor="start" class="pin-label" fill="#999">32</text>
+
+  <!-- Pin 31: GP26 — POT A (ADC0) -->
+  <circle cx="518" cy="306" r="5" fill="#3498DB" stroke="#2980B9" stroke-width="1"/>
+  <rect x="530" y="299" width="115" height="14" rx="2" fill="#EBF5FB" stroke="#3498DB" stroke-width="1.5"/>
+  <text x="587" y="309" text-anchor="middle" class="pin-label-highlight" fill="#2980B9">GP26 POTA/ADC0</text>
+  <text x="650" y="309" text-anchor="start" class="pin-label" fill="#999">31</text>
+
+  <!-- Pin 30: RUN -->
+  <circle cx="518" cy="328" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="321" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="331" text-anchor="middle" class="pin-label">RUN</text>
+  <text x="630" y="331" text-anchor="start" class="pin-label" fill="#999">30</text>
+
+  <!-- Pin 29: GP22 -->
+  <circle cx="518" cy="350" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="343" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="353" text-anchor="middle" class="pin-label">GP22</text>
+  <text x="630" y="353" text-anchor="start" class="pin-label" fill="#999">29</text>
+
+  <!-- Pin 28: GND -->
+  <circle cx="518" cy="372" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <rect x="530" y="365" width="95" height="14" rx="2" fill="#eee" stroke="#555" stroke-width="1"/>
+  <text x="577" y="375" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+  <text x="630" y="375" text-anchor="start" class="pin-label" fill="#999">28</text>
+
+  <!-- Pin 27: GP21 -->
+  <circle cx="518" cy="394" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="387" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="397" text-anchor="middle" class="pin-label">GP21</text>
+  <text x="630" y="397" text-anchor="start" class="pin-label" fill="#999">27</text>
+
+  <!-- Pin 26: GP20 -->
+  <circle cx="518" cy="416" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="409" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="419" text-anchor="middle" class="pin-label">GP20</text>
+  <text x="630" y="419" text-anchor="start" class="pin-label" fill="#999">26</text>
+
+  <!-- Pin 25: GP19 -->
+  <circle cx="518" cy="438" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="431" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="441" text-anchor="middle" class="pin-label">GP19</text>
+  <text x="630" y="441" text-anchor="start" class="pin-label" fill="#999">25</text>
+
+  <!-- Pin 24: GP18 -->
+  <circle cx="518" cy="460" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="453" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="463" text-anchor="middle" class="pin-label">GP18</text>
+  <text x="630" y="463" text-anchor="start" class="pin-label" fill="#999">24</text>
+
+  <!-- Pin 23: GND -->
+  <circle cx="518" cy="482" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <rect x="530" y="475" width="95" height="14" rx="2" fill="#eee" stroke="#555" stroke-width="1"/>
+  <text x="577" y="485" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+  <text x="630" y="485" text-anchor="start" class="pin-label" fill="#999">23</text>
+
+  <!-- Pin 22: GP17 -->
+  <circle cx="518" cy="504" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="497" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="507" text-anchor="middle" class="pin-label">GP17</text>
+  <text x="630" y="507" text-anchor="start" class="pin-label" fill="#999">22</text>
+
+  <!-- Pin 21: GP16 -->
+  <circle cx="518" cy="526" r="5" fill="#ddd" stroke="#999" stroke-width="1"/>
+  <rect x="530" y="519" width="95" height="14" rx="2" fill="#f5f5f5" stroke="#ccc" stroke-width="0.5"/>
+  <text x="577" y="529" text-anchor="middle" class="pin-label">GP16</text>
+  <text x="630" y="529" text-anchor="start" class="pin-label" fill="#999">21</text>
+
+  <!-- Debug pins at bottom of board -->
+  <text x="400" y="558" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#888">Debug: SWCLK / GND / SWDIO (bottom pads)</text>
+
+  <!-- Pin 1 indicator -->
+  <rect x="276" y="100" width="14" height="4" rx="1" fill="#fff" opacity="0.6"/>
+  <text x="283" y="103" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="6" fill="#333">Pin 1</text>
+
+  <!-- Note about shared pins -->
+  <rect x="50" y="555" width="700" height="35" rx="4" fill="#FFF9E6" stroke="#F39C12" stroke-width="1"/>
+  <text x="400" y="570" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333" font-weight="bold">Note: GP4/GP5 are shared between Buttons 3-4 and I2C (VL53L0X sensor).</text>
+  <text x="400" y="583" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#555">Students choose buttons OR distance sensor — not both simultaneously.</text>
+</svg>

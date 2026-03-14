@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pico Music Workshop — Config Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="header">
+    <h1>Pico Music Workshop &mdash; Config Generator</h1>
+    <p>Pick your track, tweak the options, copy the code to your Pico.</p>
+  </header>
+
+  <main class="container">
+
+    <!-- Step 1: Choose Track -->
+    <section class="step-card">
+      <span class="step-number">Step 1</span>
+      <h2>Choose Your Track</h2>
+      <div class="track-picker">
+        <button class="track-btn" id="track-synth" type="button">
+          <span class="icon">&#127932;</span>
+          <span class="label">Synth</span>
+          <span class="desc">Build sounds from scratch with sensors</span>
+        </button>
+        <button class="track-btn" id="track-midi" type="button">
+          <span class="icon">&#127929;</span>
+          <span class="label">MIDI</span>
+          <span class="desc">Control external synths &amp; software</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Step 2a: Synth Options -->
+    <section class="step-card synth-options hidden" id="synth-options">
+      <span class="step-number">Step 2</span>
+      <h2>Synth Options</h2>
+      <div id="synth-options-body"></div>
+    </section>
+
+    <!-- Step 2b: MIDI Options -->
+    <section class="step-card midi-options hidden" id="midi-options">
+      <span class="step-number">Step 2</span>
+      <h2>MIDI Options</h2>
+      <div id="midi-options-body"></div>
+    </section>
+
+    <!-- Step 3 & 4: Code Output -->
+    <section class="step-card code-step hidden" id="code-step">
+      <span class="step-number">Step 3</span>
+      <h2>Your code.py</h2>
+      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">
+        Copy this code to the <strong>code.py</strong> file on your Pico.
+      </p>
+      <div class="code-output">
+        <div class="code-header">
+          <span class="filename">code.py</span>
+          <div class="code-actions">
+            <button class="btn btn-copy" id="btn-copy" type="button">Copy to Clipboard</button>
+            <button class="btn btn-download" id="btn-download" type="button">Download</button>
+          </div>
+        </div>
+        <div class="code-body">
+          <pre id="code-preview"></pre>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

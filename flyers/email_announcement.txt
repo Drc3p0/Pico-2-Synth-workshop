@@ -1,0 +1,29 @@
+Subject: Build a Synthesizer with Raspberry Pi Pico 2
+
+---
+
+Hi everyone,
+
+We're hosting a hands-on music workshop where you'll build a working synthesizer using the Raspberry Pi Pico 2 microcontroller. No prior experience needed—just bring curiosity and a laptop.
+
+What you'll learn:
+- Embedded systems and microcontroller programming
+- Reading analog sensors (potentiometers, buttons, light sensors)
+- Real-time digital audio synthesis
+- Breadboard circuit design
+
+What you'll build:
+A fully functional synthesizer that responds to your touch and light. You'll take home the hardware kit to continue experimenting.
+
+Details:
+- All hardware provided (no soldering required)
+- Bring a laptop with USB-C
+- Open to all skill levels
+- [DATE/TIME/LOCATION]
+
+Sign up here: [REGISTRATION LINK]
+
+Questions? Reply to this email.
+
+See you there,
+[ORGANIZER NAME]

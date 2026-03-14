@@ -1,0 +1,16 @@
+{
+  "name": "pico-workshop-generator",
+  "description": "Prompt pack for generating a full Raspberry Pi Pico synth + USB MIDI workshop",
+  "version": "0.2.0",
+  "entrypoints": [
+    "plugin/prompts/01-architecture.md",
+    "plugin/prompts/02-firmware-synth.md",
+    "plugin/prompts/03-firmware-midi.md",
+    "plugin/prompts/04-visuals.md",
+    "plugin/prompts/05-slides.md",
+    "plugin/prompts/06-docs-and-handouts.md",
+    "plugin/prompts/07-bom-and-flyers.md",
+    "plugin/prompts/08-web-config-generator.md",
+    "plugin/prompts/09-validation-and-repair.md"
+  ]
+}

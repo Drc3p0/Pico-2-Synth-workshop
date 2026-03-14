@@ -1,0 +1,22 @@
+SHORT VERSION (Twitter/Mastodon - 280 chars):
+Build a synthesizer with Raspberry Pi Pico 2. Learn embedded systems, analog input, and real-time audio synthesis. No experience needed. [DATE/TIME/LOCATION] #MakerFaire #RaspberryPi #Electronics
+
+---
+
+LONG VERSION (Instagram/Facebook):
+🎵 Build Your Own Synthesizer 🎵
+
+Ever wanted to make music with code? In this workshop, you'll design and build a working synthesizer using the Raspberry Pi Pico 2 microcontroller.
+
+What you'll do:
+→ Wire up breadboard circuits with buttons, potentiometers, and light sensors
+→ Write code to read analog inputs and generate audio waveforms
+→ Create an instrument that responds to your touch and light
+→ Take home a fully functional synthesizer kit
+
+No soldering, no prior experience needed. Just bring a laptop and your curiosity.
+
+[DATE/TIME/LOCATION]
+Register: [LINK]
+
+#RaspberryPi #Synthesizer #Electronics #MakerFaire #STEM #DIY

@@ -1,0 +1,47 @@
+MAKER FAIRE WORKSHOP PROPOSAL
+
+Title:
+Build a Synthesizer with Raspberry Pi Pico 2
+
+What It Is:
+A hands-on workshop where participants design and build a working synthesizer using the Raspberry Pi Pico 2 microcontroller. No soldering required. Participants wire breadboard circuits, write code to read analog sensors, and generate real-time audio—all while making music.
+
+Why It's Interesting:
+This workshop bridges the gap between hardware and software. Participants see immediate, tangible results (they make actual sounds) while learning embedded systems fundamentals. It's engaging for beginners and offers depth for experienced makers. The intersection of electronics, programming, and music appeals to a broad Maker Faire audience.
+
+What Attendees Get:
+- A complete synthesizer kit (Pico 2, breadboard, buttons, potentiometers, light sensor, speaker)
+- Hands-on experience with microcontroller programming
+- Understanding of analog-to-digital conversion and digital audio synthesis
+- A working instrument to take home and modify
+
+Experience Level:
+All levels welcome. No prior electronics or programming experience required. Experienced makers can explore advanced features (distance sensors, custom waveforms, MIDI integration).
+
+Duration:
+90 minutes (flexible: can run 60-120 minutes depending on depth)
+
+Materials Cost:
+~$11.50 per participant (basic kit) or ~$21.50 (deluxe with distance sensor)
+
+Instructor Requirements:
+- 1 lead instructor + 1 assistant for 30-40 participants
+- Table space for 8-10 workstations
+- Power outlets for USB charging
+- Projector/screen for live coding demo (optional but recommended)
+
+Supplies Provided by Organizer:
+- All hardware kits
+- USB cables and power
+- Spare components for troubleshooting
+- Pre-loaded code examples on USB drives (optional)
+
+Learning Outcomes:
+Participants will understand:
+- How microcontrollers read analog inputs
+- Real-time audio synthesis and waveform generation
+- Breadboard circuit design and prototyping
+- Embedded systems programming fundamentals
+
+Why Maker Faire:
+This workshop embodies the maker spirit: hands-on learning, creative expression, and accessible technology. Participants leave with a functional instrument and the knowledge to build more. It's educational, fun, and immediately gratifying.

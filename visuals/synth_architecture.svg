@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 500" width="700" height="500">
+  <defs>
+    <marker id="arch-arrow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#333"/>
+    </marker>
+    <marker id="arch-arrow-up" markerWidth="8" markerHeight="6" refX="0" refY="3" orient="auto">
+      <polygon points="8 0, 0 3, 8 6" fill="#555"/>
+    </marker>
+  </defs>
+  <style>
+    .layer-title { font-family: Arial, Helvetica, sans-serif; font-size: 14px; font-weight: bold; fill: #fff; }
+    .layer-subtitle { font-family: 'Courier New', monospace; font-size: 11px; fill: #fff; opacity: 0.85; }
+    .layer-desc { font-family: Arial, Helvetica, sans-serif; font-size: 10px; fill: #fff; opacity: 0.7; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; fill: #222; }
+    .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 10px; fill: #666; }
+    .side-label { font-family: Arial, Helvetica, sans-serif; font-size: 10px; fill: #555; }
+    .divider-label { font-family: Arial, Helvetica, sans-serif; font-size: 11px; font-weight: bold; }
+  </style>
+  <rect width="700" height="500" fill="#fff"/>
+
+  <!-- Title -->
+  <text x="350" y="25" text-anchor="middle" class="title">Software Architecture — Layered Design</text>
+  <text x="350" y="42" text-anchor="middle" class="subtitle">Students only edit the top layer (CONFIG) — the engine handles the rest</text>
+
+  <!-- ========== LAYER 1: CONFIG (top - student-facing) ========== -->
+  <rect x="80" y="60" width="540" height="80" rx="6" fill="#27AE60" stroke="#1E8449" stroke-width="2"/>
+
+  <!-- Friendly edit icon -->
+  <rect x="92" y="70" width="24" height="24" rx="3" fill="#1E8449"/>
+  <text x="104" y="88" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#fff">&#9998;</text>
+
+  <text x="350" y="85" text-anchor="middle" class="layer-title">code.py — CONFIG Dictionary</text>
+  <text x="350" y="103" text-anchor="middle" class="layer-subtitle">CONFIG = { "scale": "minor_pentatonic", "root_note": 60, ... }</text>
+  <text x="350" y="120" text-anchor="middle" class="layer-desc">Students customize: scale, root note, FX settings, MIDI channel, LFO speed</text>
+  <text x="350" y="133" text-anchor="middle" class="layer-desc">Plain Python dictionary — hard to break, easy to experiment with</text>
+
+  <!-- Side label -->
+  <text x="640" y="95" text-anchor="start" class="side-label" fill="#27AE60" font-weight="bold">STUDENT</text>
+  <text x="640" y="108" text-anchor="start" class="side-label" fill="#27AE60" font-weight="bold">LAYER</text>
+
+  <!-- ========== DASHED DIVIDER LINE ========== -->
+  <line x1="40" y1="160" x2="660" y2="160" stroke="#E74C3C" stroke-width="2.5" stroke-dasharray="8,4"/>
+  <rect x="200" y="148" width="300" height="22" rx="4" fill="#fff" stroke="#E74C3C" stroke-width="1.5"/>
+  <text x="350" y="164" text-anchor="middle" class="divider-label" fill="#E74C3C">&#9650; Students edit above this line &#9650;</text>
+
+  <!-- ========== LAYER 2: ENGINE (main loop) ========== -->
+  <rect x="80" y="182" width="540" height="80" rx="6" fill="#2980B9" stroke="#1F618D" stroke-width="2"/>
+
+  <!-- Gear icon -->
+  <rect x="92" y="192" width="24" height="24" rx="3" fill="#1F618D"/>
+  <text x="104" y="210" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#fff">&#9881;</text>
+
+  <text x="350" y="207" text-anchor="middle" class="layer-title">synth_engine.py — Main Loop</text>
+  <text x="350" y="225" text-anchor="middle" class="layer-subtitle">class SynthEngine: setup(), run(), _handle_input(), _update_synth()</text>
+  <text x="350" y="242" text-anchor="middle" class="layer-desc">Reads CONFIG \u2192 initializes synthio \u2192 runs main loop \u2192 responds to inputs</text>
+  <text x="350" y="254" text-anchor="middle" class="layer-desc">Orchestrates all modules below — students don't need to touch this</text>
+
+  <text x="640" y="215" text-anchor="start" class="side-label" fill="#2980B9" font-weight="bold">ENGINE</text>
+  <text x="640" y="228" text-anchor="start" class="side-label" fill="#2980B9" font-weight="bold">LAYER</text>
+
+  <!-- Arrow between Layer 1 and 2 -->
+  <line x1="330" y1="140" x2="330" y2="182" stroke="#333" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+  <text x="320" y="178" text-anchor="end" font-family="'Courier New', monospace" font-size="8" fill="#555">CONFIG</text>
+  <line x1="370" y1="182" x2="370" y2="140" stroke="#555" stroke-width="1" stroke-dasharray="3,2" marker-end="url(#arch-arrow-up)"/>
+  <text x="380" y="178" text-anchor="start" font-family="'Courier New', monospace" font-size="8" fill="#555">status</text>
+
+  <!-- ========== LAYER 3: MODULES (three side-by-side) ========== -->
+  <!-- inputs.py -->
+  <rect x="80" y="290" width="170" height="80" rx="6" fill="#8E44AD" stroke="#6C3483" stroke-width="2"/>
+  <text x="165" y="313" text-anchor="middle" class="layer-title">inputs.py</text>
+  <text x="165" y="330" text-anchor="middle" class="layer-subtitle">InputReader class</text>
+  <text x="165" y="347" text-anchor="middle" class="layer-desc">Buttons, pots, LDR</text>
+  <text x="165" y="359" text-anchor="middle" class="layer-desc">Debounce + smooth</text>
+
+  <!-- patches.py -->
+  <rect x="265" y="290" width="170" height="80" rx="6" fill="#8E44AD" stroke="#6C3483" stroke-width="2"/>
+  <text x="350" y="313" text-anchor="middle" class="layer-title">patches.py</text>
+  <text x="350" y="330" text-anchor="middle" class="layer-subtitle">PatchManager class</text>
+  <text x="350" y="347" text-anchor="middle" class="layer-desc">Scales, waveforms</text>
+  <text x="350" y="359" text-anchor="middle" class="layer-desc">Note mapping, presets</text>
+
+  <!-- fx.py -->
+  <rect x="450" y="290" width="170" height="80" rx="6" fill="#8E44AD" stroke="#6C3483" stroke-width="2"/>
+  <text x="535" y="313" text-anchor="middle" class="layer-title">fx.py</text>
+  <text x="535" y="330" text-anchor="middle" class="layer-subtitle">EffectsChain class</text>
+  <text x="535" y="347" text-anchor="middle" class="layer-desc">Distortion, echo, reverb</text>
+  <text x="535" y="359" text-anchor="middle" class="layer-desc">Parameter mapping</text>
+
+  <text x="640" y="325" text-anchor="start" class="side-label" fill="#8E44AD" font-weight="bold">MODULE</text>
+  <text x="640" y="338" text-anchor="start" class="side-label" fill="#8E44AD" font-weight="bold">LAYER</text>
+
+  <!-- Arrows between Layer 2 and 3 -->
+  <line x1="165" y1="262" x2="165" y2="290" stroke="#333" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+  <line x1="350" y1="262" x2="350" y2="290" stroke="#333" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+  <line x1="535" y1="262" x2="535" y2="290" stroke="#333" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+
+  <!-- ========== LAYER 4: HARDWARE (bottom) ========== -->
+  <rect x="80" y="400" width="540" height="80" rx="6" fill="#555" stroke="#333" stroke-width="2"/>
+
+  <!-- Chip icon -->
+  <rect x="92" y="410" width="24" height="24" rx="3" fill="#333"/>
+  <text x="104" y="428" text-anchor="middle" font-family="'Courier New', monospace" font-size="10" fill="#fff">IC</text>
+
+  <text x="350" y="425" text-anchor="middle" class="layer-title">Pico 2 Hardware — RP2350</text>
+
+  <!-- Hardware sub-blocks -->
+  <rect x="100" y="438" width="70" height="25" rx="3" fill="#E74C3C" opacity="0.8"/>
+  <text x="135" y="455" text-anchor="middle" class="layer-subtitle">GPIO</text>
+
+  <rect x="185" y="438" width="70" height="25" rx="3" fill="#3498DB" opacity="0.8"/>
+  <text x="220" y="455" text-anchor="middle" class="layer-subtitle">ADC</text>
+
+  <rect x="270" y="438" width="70" height="25" rx="3" fill="#F39C12" opacity="0.8"/>
+  <text x="305" y="455" text-anchor="middle" class="layer-subtitle">PWM</text>
+
+  <rect x="355" y="438" width="70" height="25" rx="3" fill="#2ECC71" opacity="0.8"/>
+  <text x="390" y="455" text-anchor="middle" class="layer-subtitle">I2C</text>
+
+  <rect x="440" y="438" width="70" height="25" rx="3" fill="#8E44AD" opacity="0.8"/>
+  <text x="475" y="455" text-anchor="middle" class="layer-subtitle">USB</text>
+
+  <text x="350" y="475" text-anchor="middle" class="layer-desc">CircuitPython runtime + board hardware abstraction</text>
+
+  <text x="640" y="435" text-anchor="start" class="side-label" fill="#555" font-weight="bold">HARDWARE</text>
+  <text x="640" y="448" text-anchor="start" class="side-label" fill="#555" font-weight="bold">LAYER</text>
+
+  <!-- Arrows between Layer 3 and 4 -->
+  <line x1="165" y1="370" x2="165" y2="400" stroke="#333" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+  <line x1="350" y1="370" x2="350" y2="400" stroke="#333" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+  <line x1="535" y1="370" x2="535" y2="400" stroke="#333" stroke-width="1.5" marker-end="url(#arch-arrow)"/>
+
+  <!-- Left side bracket / label showing abstraction -->
+  <line x1="55" y1="65" x2="55" y2="475" stroke="#ccc" stroke-width="1"/>
+  <line x1="55" y1="65" x2="65" y2="65" stroke="#ccc" stroke-width="1"/>
+  <line x1="55" y1="475" x2="65" y2="475" stroke="#ccc" stroke-width="1"/>
+  <text x="48" y="275" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#aaa" transform="rotate(-90, 48, 275)">Higher abstraction \u2192 Lower abstraction</text>
+</svg>

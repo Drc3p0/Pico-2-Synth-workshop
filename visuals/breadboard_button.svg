@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <marker id="arrowhead" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#333"/>
+    </marker>
+    <marker id="arrowhead-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0 0, 8 3, 0 6" fill="#E74C3C"/>
+    </marker>
+  </defs>
+  <style>
+    .pin-label { font-family: 'Courier New', monospace; font-size: 13px; font-weight: bold; }
+    .desc { font-family: Arial, Helvetica, sans-serif; font-size: 12px; fill: #555; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 16px; font-weight: bold; fill: #222; }
+    .note { font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #777; }
+    .component-label { font-family: Arial, Helvetica, sans-serif; font-size: 13px; font-weight: bold; fill: #333; }
+  </style>
+  <rect width="600" height="400" fill="#fff"/>
+
+  <!-- Title -->
+  <text x="300" y="30" text-anchor="middle" class="title">Button Wiring — Pull-Up, Active LOW</text>
+  <text x="300" y="48" text-anchor="middle" class="desc">Press button = GP2 reads LOW (connected to GND)</text>
+
+  <!-- Pico board (left side) -->
+  <rect x="40" y="100" width="120" height="220" rx="6" fill="#1a5e1a" stroke="#0d3d0d" stroke-width="2"/>
+  <text x="100" y="135" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#fff" font-weight="bold">Pico 2</text>
+
+  <!-- GP2 pin -->
+  <rect x="140" y="165" width="20" height="12" rx="2" fill="#E74C3C"/>
+  <circle cx="170" cy="171" r="5" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+  <text x="55" y="175" text-anchor="start" class="pin-label" fill="#E74C3C">GP2</text>
+
+  <!-- GND pin -->
+  <rect x="140" y="255" width="20" height="12" rx="2" fill="#555"/>
+  <circle cx="170" cy="261" r="5" fill="#555" stroke="#333" stroke-width="1"/>
+  <text x="55" y="265" text-anchor="start" class="pin-label" fill="#555">GND</text>
+
+  <!-- 3.3V inside Pico (for pull-up) -->
+  <text x="100" y="195" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#ccc">3.3V (internal)</text>
+
+  <!-- Internal pull-up resistor (dotted) -->
+  <line x1="100" y1="120" x2="100" y2="160" stroke="#E74C3C" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+  <!-- Resistor zigzag (simplified) -->
+  <path d="M100,145 l5,-5 l-10,-5 l10,-5 l-10,-5 l5,-5" stroke="#E74C3C" stroke-width="1.5" stroke-dasharray="4,3" fill="none" opacity="0.6"/>
+  <text x="125" y="140" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#E74C3C" opacity="0.7">Internal</text>
+  <text x="125" y="150" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#E74C3C" opacity="0.7">Pull-Up</text>
+
+  <!-- Wire from GP2 to button -->
+  <line x1="175" y1="171" x2="300" y2="171" stroke="#E74C3C" stroke-width="2.5"/>
+
+  <!-- Button component -->
+  <rect x="300" y="140" width="100" height="62" rx="6" fill="#f5f5f5" stroke="#333" stroke-width="2"/>
+  <!-- Button body -->
+  <rect x="320" y="155" width="60" height="32" rx="4" fill="#ddd" stroke="#999" stroke-width="1.5"/>
+  <rect x="328" y="160" width="44" height="22" rx="3" fill="#bbb" stroke="#888" stroke-width="1"/>
+  <!-- Button terminals -->
+  <circle cx="310" cy="171" r="4" fill="#E74C3C" stroke="#C0392B" stroke-width="1"/>
+  <circle cx="390" cy="171" r="4" fill="#555" stroke="#333" stroke-width="1"/>
+  <!-- Button label -->
+  <text x="350" y="130" text-anchor="middle" class="component-label">Tactile Button</text>
+  <text x="350" y="220" text-anchor="middle" class="desc">Normally OPEN</text>
+
+  <!-- Wire from button to GND junction -->
+  <line x1="394" y1="171" x2="470" y2="171" stroke="#555" stroke-width="2.5"/>
+  <line x1="470" y1="171" x2="470" y2="261" stroke="#555" stroke-width="2.5"/>
+
+  <!-- Wire from Pico GND to junction -->
+  <line x1="175" y1="261" x2="470" y2="261" stroke="#555" stroke-width="2.5"/>
+
+  <!-- GND symbol -->
+  <line x1="470" y1="261" x2="470" y2="280" stroke="#555" stroke-width="2.5"/>
+  <line x1="455" y1="280" x2="485" y2="280" stroke="#555" stroke-width="2.5"/>
+  <line x1="460" y1="286" x2="480" y2="286" stroke="#555" stroke-width="2"/>
+  <line x1="465" y1="292" x2="475" y2="292" stroke="#555" stroke-width="1.5"/>
+  <text x="470" y="308" text-anchor="middle" class="pin-label" fill="#555">GND</text>
+
+  <!-- State labels -->
+  <rect x="200" y="320" width="180" height="60" rx="4" fill="#FDEDEC" stroke="#E74C3C" stroke-width="1"/>
+  <text x="290" y="340" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333" font-weight="bold">Button NOT pressed:</text>
+  <text x="290" y="355" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#E74C3C">GP2 = HIGH (3.3V)</text>
+  <text x="290" y="370" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#777">Pull-up holds pin HIGH</text>
+
+  <rect x="400" y="320" width="180" height="60" rx="4" fill="#E8F8F5" stroke="#2ECC71" stroke-width="1"/>
+  <text x="490" y="340" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11" fill="#333" font-weight="bold">Button PRESSED:</text>
+  <text x="490" y="355" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#2ECC71">GP2 = LOW (0V)</text>
+  <text x="490" y="370" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#777">Pin shorted to GND</text>
+
+  <!-- Code hint -->
+  <rect x="20" y="320" width="170" height="60" rx="4" fill="#F4F6F7" stroke="#BDC3C7" stroke-width="1"/>
+  <text x="105" y="337" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#555" font-weight="bold">CircuitPython:</text>
+  <text x="105" y="353" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#333">pin = digitalio</text>
+  <text x="105" y="366" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#333">.DigitalInOut(GP2)</text>
+  <text x="105" y="379" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#333">pin.pull = Pull.UP</text>
+
+  <!-- Labels on wires -->
+  <text x="235" y="163" text-anchor="middle" class="note">Signal wire</text>
+  <text x="340" y="253" text-anchor="middle" class="note">Ground wire</text>
+</svg>

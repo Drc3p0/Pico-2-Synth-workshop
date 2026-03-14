@@ -1,0 +1,272 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" width="1200" height="800">
+  <defs>
+    <marker id="arr-full" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto">
+      <polygon points="0 0, 6 2, 0 4" fill="#333"/>
+    </marker>
+  </defs>
+  <style>
+    .pin-label { font-family: 'Courier New', monospace; font-size: 10px; font-weight: bold; }
+    .desc { font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #555; }
+    .title { font-family: Arial, Helvetica, sans-serif; font-size: 18px; font-weight: bold; fill: #222; }
+    .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 11px; fill: #666; }
+    .note { font-family: Arial, Helvetica, sans-serif; font-size: 9px; fill: #777; }
+    .comp-label { font-family: Arial, Helvetica, sans-serif; font-size: 10px; font-weight: bold; fill: #333; }
+    .wire-label { font-family: Arial, Helvetica, sans-serif; font-size: 8px; }
+  </style>
+  <rect width="1200" height="800" fill="#fff"/>
+
+  <!-- Title -->
+  <text x="600" y="28" text-anchor="middle" class="title">Complete Workshop Build — All Components</text>
+  <text x="600" y="44" text-anchor="middle" class="subtitle">4 Buttons (GP2-5) | 2 Pots (GP26-27) | LDR (GP28) | Speaker (GP15)</text>
+
+  <!-- ========== BREADBOARD ========== -->
+  <rect x="80" y="55" width="1040" height="700" rx="6" fill="#F8F8F2" stroke="#ccc" stroke-width="1.5"/>
+  <!-- Breadboard power rails (top) -->
+  <rect x="95" y="62" width="1010" height="20" rx="2" fill="#FFE8E8" stroke="#E74C3C" stroke-width="0.5" opacity="0.3"/>
+  <text x="100" y="76" font-family="'Courier New', monospace" font-size="8" fill="#C0392B">+ 3.3V Rail</text>
+  <rect x="95" y="84" width="1010" height="20" rx="2" fill="#E8E8E8" stroke="#555" stroke-width="0.5" opacity="0.3"/>
+  <text x="100" y="98" font-family="'Courier New', monospace" font-size="8" fill="#555">- GND Rail</text>
+
+  <!-- Breadboard power rails (bottom) -->
+  <rect x="95" y="700" width="1010" height="20" rx="2" fill="#FFE8E8" stroke="#E74C3C" stroke-width="0.5" opacity="0.3"/>
+  <text x="100" y="714" font-family="'Courier New', monospace" font-size="8" fill="#C0392B">+ 3.3V Rail</text>
+  <rect x="95" y="722" width="1010" height="20" rx="2" fill="#E8E8E8" stroke="#555" stroke-width="0.5" opacity="0.3"/>
+  <text x="100" y="736" font-family="'Courier New', monospace" font-size="8" fill="#555">- GND Rail</text>
+
+  <!-- ========== PICO 2 (centered) ========== -->
+  <rect x="430" y="290" width="340" height="180" rx="6" fill="#1a5e1a" stroke="#0d3d0d" stroke-width="2"/>
+  <text x="600" y="325" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="14" fill="#fff" font-weight="bold">Raspberry Pi Pico 2</text>
+  <text x="600" y="342" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#aaa">RP2350</text>
+
+  <!-- USB port -->
+  <rect x="575" y="282" width="50" height="16" rx="3" fill="#888" stroke="#555" stroke-width="1"/>
+  <text x="600" y="293" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="7" fill="#fff">USB</text>
+
+  <!-- Left side pins (top to bottom) -->
+  <!-- GP2 -->
+  <circle cx="438" cy="350" r="4" fill="#E74C3C"/>
+  <text x="460" y="354" class="pin-label" fill="#E74C3C">GP2</text>
+  <!-- GP3 -->
+  <circle cx="438" cy="370" r="4" fill="#E74C3C"/>
+  <text x="460" y="374" class="pin-label" fill="#E74C3C">GP3</text>
+  <!-- GP4 -->
+  <circle cx="438" cy="390" r="4" fill="#E74C3C"/>
+  <text x="460" y="394" class="pin-label" fill="#E74C3C">GP4</text>
+  <!-- GP5 -->
+  <circle cx="438" cy="410" r="4" fill="#E74C3C"/>
+  <text x="460" y="414" class="pin-label" fill="#E74C3C">GP5</text>
+  <!-- GND (left) -->
+  <circle cx="438" cy="435" r="4" fill="#555"/>
+  <text x="460" y="439" class="pin-label" fill="#555">GND</text>
+  <!-- GP15 -->
+  <circle cx="438" cy="455" r="4" fill="#F39C12"/>
+  <text x="453" y="459" class="pin-label" fill="#F39C12">GP15</text>
+
+  <!-- Right side pins -->
+  <!-- 3V3 -->
+  <circle cx="762" cy="350" r="4" fill="#C0392B"/>
+  <text x="710" y="354" text-anchor="end" class="pin-label" fill="#C0392B">3V3</text>
+  <!-- GP26 -->
+  <circle cx="762" cy="390" r="4" fill="#3498DB"/>
+  <text x="710" y="394" text-anchor="end" class="pin-label" fill="#3498DB">GP26</text>
+  <!-- GP27 -->
+  <circle cx="762" cy="410" r="4" fill="#3498DB"/>
+  <text x="710" y="414" text-anchor="end" class="pin-label" fill="#3498DB">GP27</text>
+  <!-- GP28 -->
+  <circle cx="762" cy="430" r="4" fill="#3498DB"/>
+  <text x="710" y="434" text-anchor="end" class="pin-label" fill="#3498DB">GP28</text>
+  <!-- GND (right) -->
+  <circle cx="762" cy="455" r="4" fill="#555"/>
+  <text x="710" y="459" text-anchor="end" class="pin-label" fill="#555">GND</text>
+
+  <!-- ========== 4 BUTTONS (left side) ========== -->
+  <!-- Button 1 (GP2) -->
+  <rect x="140" y="330" width="70" height="30" rx="4" fill="#f5f5f5" stroke="#E74C3C" stroke-width="2"/>
+  <rect x="152" y="337" width="46" height="16" rx="3" fill="#E74C3C" opacity="0.2"/>
+  <text x="175" y="350" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#E74C3C" font-weight="bold">BTN 1</text>
+  <!-- Wire GP2 to button -->
+  <line x1="210" y1="345" x2="340" y2="345" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="340" y1="345" x2="340" y2="350" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="340" y1="350" x2="434" y2="350" stroke="#E74C3C" stroke-width="2"/>
+  <!-- Button to GND -->
+  <line x1="140" y1="345" x2="120" y2="345" stroke="#555" stroke-width="1.5"/>
+  <line x1="120" y1="345" x2="120" y2="94" stroke="#555" stroke-width="1.5"/>
+
+  <!-- Button 2 (GP3) -->
+  <rect x="140" y="370" width="70" height="30" rx="4" fill="#f5f5f5" stroke="#E74C3C" stroke-width="2"/>
+  <rect x="152" y="377" width="46" height="16" rx="3" fill="#E74C3C" opacity="0.2"/>
+  <text x="175" y="390" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#E74C3C" font-weight="bold">BTN 2</text>
+  <line x1="210" y1="385" x2="350" y2="385" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="350" y1="385" x2="350" y2="370" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="350" y1="370" x2="434" y2="370" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="140" y1="385" x2="130" y2="385" stroke="#555" stroke-width="1.5"/>
+  <line x1="130" y1="385" x2="130" y2="94" stroke="#555" stroke-width="1.5"/>
+
+  <!-- Button 3 (GP4) -->
+  <rect x="140" y="410" width="70" height="30" rx="4" fill="#f5f5f5" stroke="#E74C3C" stroke-width="2"/>
+  <rect x="152" y="417" width="46" height="16" rx="3" fill="#E74C3C" opacity="0.2"/>
+  <text x="175" y="430" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#E74C3C" font-weight="bold">BTN 3</text>
+  <line x1="210" y1="425" x2="360" y2="425" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="360" y1="425" x2="360" y2="390" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="360" y1="390" x2="434" y2="390" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="140" y1="425" x2="110" y2="425" stroke="#555" stroke-width="1.5"/>
+  <line x1="110" y1="425" x2="110" y2="94" stroke="#555" stroke-width="1.5"/>
+
+  <!-- Button 4 (GP5) -->
+  <rect x="140" y="450" width="70" height="30" rx="4" fill="#f5f5f5" stroke="#E74C3C" stroke-width="2"/>
+  <rect x="152" y="457" width="46" height="16" rx="3" fill="#E74C3C" opacity="0.2"/>
+  <text x="175" y="470" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#E74C3C" font-weight="bold">BTN 4</text>
+  <line x1="210" y1="465" x2="370" y2="465" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="370" y1="465" x2="370" y2="410" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="370" y1="410" x2="434" y2="410" stroke="#E74C3C" stroke-width="2"/>
+  <line x1="140" y1="465" x2="100" y2="465" stroke="#555" stroke-width="1.5"/>
+  <line x1="100" y1="465" x2="100" y2="94" stroke="#555" stroke-width="1.5"/>
+
+  <!-- Buttons section label -->
+  <text x="175" y="322" text-anchor="middle" class="comp-label" fill="#E74C3C">BUTTONS</text>
+  <text x="175" y="500" text-anchor="middle" class="note">All buttons to GND</text>
+  <text x="175" y="510" text-anchor="middle" class="note">(internal pull-up)</text>
+
+  <!-- ========== SPEAKER (bottom left) ========== -->
+  <!-- Speaker body -->
+  <rect x="160" y="575" width="80" height="60" rx="6" fill="#FEF9E7" stroke="#F39C12" stroke-width="2"/>
+  <circle cx="200" cy="605" r="20" fill="none" stroke="#F39C12" stroke-width="1.5"/>
+  <circle cx="200" cy="605" r="10" fill="none" stroke="#F39C12" stroke-width="1"/>
+  <circle cx="200" cy="605" r="3" fill="#F39C12"/>
+  <text x="200" y="650" text-anchor="middle" class="comp-label" fill="#F39C12">Speaker</text>
+  <text x="200" y="662" text-anchor="middle" class="note">PWM Audio Out</text>
+
+  <!-- Wire GP15 to speaker -->
+  <line x1="434" y1="455" x2="380" y2="455" stroke="#F39C12" stroke-width="2.5"/>
+  <line x1="380" y1="455" x2="380" y2="590" stroke="#F39C12" stroke-width="2.5"/>
+  <line x1="380" y1="590" x2="240" y2="590" stroke="#F39C12" stroke-width="2.5"/>
+  <text x="380" y="530" text-anchor="end" class="wire-label" fill="#F39C12">GP15 audio</text>
+  <!-- Speaker GND -->
+  <line x1="160" y1="620" x2="100" y2="620" stroke="#555" stroke-width="1.5"/>
+  <line x1="100" y1="620" x2="100" y2="732" stroke="#555" stroke-width="1.5"/>
+
+  <!-- ========== POT A (GP26, right top) ========== -->
+  <rect x="870" y="180" width="90" height="80" rx="6" fill="#EBF5FB" stroke="#3498DB" stroke-width="2"/>
+  <circle cx="915" cy="215" r="22" fill="#ddd" stroke="#999" stroke-width="1.5"/>
+  <circle cx="915" cy="215" r="15" fill="#ccc" stroke="#aaa" stroke-width="1"/>
+  <line x1="915" y1="215" x2="915" y2="198" stroke="#666" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="915" y="172" text-anchor="middle" class="comp-label" fill="#3498DB">POT A</text>
+  <text x="915" y="275" text-anchor="middle" class="note">Wiper \u2192 GP26 (ADC0)</text>
+
+  <!-- Pot A wiring -->
+  <!-- 3V3 to left pin -->
+  <line x1="880" y1="260" x2="880" y2="290" stroke="#C0392B" stroke-width="1.5"/>
+  <line x1="880" y1="290" x2="1060" y2="290" stroke="#C0392B" stroke-width="1.5"/>
+  <line x1="1060" y1="290" x2="1060" y2="72" stroke="#C0392B" stroke-width="1.5"/>
+  <!-- Wiper to GP26 -->
+  <line x1="915" y1="260" x2="915" y2="300" stroke="#3498DB" stroke-width="2"/>
+  <line x1="915" y1="300" x2="820" y2="300" stroke="#3498DB" stroke-width="2"/>
+  <line x1="820" y1="300" x2="820" y2="390" stroke="#3498DB" stroke-width="2"/>
+  <line x1="820" y1="390" x2="766" y2="390" stroke="#3498DB" stroke-width="2"/>
+  <!-- GND to right pin -->
+  <line x1="950" y1="260" x2="950" y2="280" stroke="#555" stroke-width="1.5"/>
+  <line x1="950" y1="280" x2="1070" y2="280" stroke="#555" stroke-width="1.5"/>
+  <line x1="1070" y1="280" x2="1070" y2="94" stroke="#555" stroke-width="1.5"/>
+
+  <!-- ========== POT B (GP27, right middle) ========== -->
+  <rect x="870" y="380" width="90" height="80" rx="6" fill="#EBF5FB" stroke="#3498DB" stroke-width="2"/>
+  <circle cx="915" cy="415" r="22" fill="#ddd" stroke="#999" stroke-width="1.5"/>
+  <circle cx="915" cy="415" r="15" fill="#ccc" stroke="#aaa" stroke-width="1"/>
+  <line x1="915" y1="415" x2="915" y2="398" stroke="#666" stroke-width="2.5" stroke-linecap="round"/>
+  <text x="915" y="372" text-anchor="middle" class="comp-label" fill="#3498DB">POT B</text>
+  <text x="915" y="475" text-anchor="middle" class="note">Wiper \u2192 GP27 (ADC1)</text>
+
+  <!-- Pot B wiring -->
+  <line x1="880" y1="460" x2="880" y2="490" stroke="#C0392B" stroke-width="1.5"/>
+  <line x1="880" y1="490" x2="1050" y2="490" stroke="#C0392B" stroke-width="1.5"/>
+  <line x1="1050" y1="490" x2="1050" y2="72" stroke="#C0392B" stroke-width="1.5"/>
+  <!-- Wiper to GP27 -->
+  <line x1="915" y1="460" x2="915" y2="500" stroke="#3498DB" stroke-width="2"/>
+  <line x1="915" y1="500" x2="830" y2="500" stroke="#3498DB" stroke-width="2"/>
+  <line x1="830" y1="500" x2="830" y2="410" stroke="#3498DB" stroke-width="2"/>
+  <line x1="830" y1="410" x2="766" y2="410" stroke="#3498DB" stroke-width="2"/>
+  <!-- GND -->
+  <line x1="950" y1="460" x2="950" y2="480" stroke="#555" stroke-width="1.5"/>
+  <line x1="950" y1="480" x2="1080" y2="480" stroke="#555" stroke-width="1.5"/>
+  <line x1="1080" y1="480" x2="1080" y2="94" stroke="#555" stroke-width="1.5"/>
+
+  <!-- ========== LDR VOLTAGE DIVIDER (GP28, right bottom) ========== -->
+  <text x="915" y="540" text-anchor="middle" class="comp-label" fill="#3498DB">LDR CIRCUIT</text>
+
+  <!-- LDR -->
+  <rect x="890" y="548" width="50" height="40" rx="4" fill="#FFF9E6" stroke="#F39C12" stroke-width="1.5"/>
+  <circle cx="915" cy="568" r="12" fill="none" stroke="#F39C12" stroke-width="1.5"/>
+  <text x="915" y="572" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="7" fill="#F39C12">LDR</text>
+
+  <!-- 10k resistor -->
+  <rect x="895" y="610" width="40" height="28" rx="2" fill="#F4F6F7" stroke="#333" stroke-width="1.5"/>
+  <text x="915" y="628" text-anchor="middle" font-family="'Courier New', monospace" font-size="8" fill="#333">10k</text>
+
+  <!-- LDR 3V3 connection -->
+  <line x1="915" y1="548" x2="915" y2="530" stroke="#C0392B" stroke-width="1.5"/>
+  <line x1="915" y1="530" x2="1040" y2="530" stroke="#C0392B" stroke-width="1.5"/>
+  <line x1="1040" y1="530" x2="1040" y2="72" stroke="#C0392B" stroke-width="1.5"/>
+
+  <!-- Junction point -->
+  <circle cx="915" cy="598" r="4" fill="#3498DB" stroke="#2980B9" stroke-width="1.5"/>
+
+  <!-- LDR to junction -->
+  <line x1="915" y1="588" x2="915" y2="594" stroke="#333" stroke-width="1.5"/>
+  <!-- Junction to resistor -->
+  <line x1="915" y1="602" x2="915" y2="610" stroke="#333" stroke-width="1.5"/>
+
+  <!-- Junction to GP28 -->
+  <line x1="911" y1="598" x2="840" y2="598" stroke="#3498DB" stroke-width="2"/>
+  <line x1="840" y1="598" x2="840" y2="430" stroke="#3498DB" stroke-width="2"/>
+  <line x1="840" y1="430" x2="766" y2="430" stroke="#3498DB" stroke-width="2"/>
+
+  <!-- 10k to GND -->
+  <line x1="915" y1="638" x2="915" y2="660" stroke="#555" stroke-width="1.5"/>
+  <line x1="915" y1="660" x2="1090" y2="660" stroke="#555" stroke-width="1.5"/>
+  <line x1="1090" y1="660" x2="1090" y2="732" stroke="#555" stroke-width="1.5"/>
+
+  <!-- ========== POWER RAIL CONNECTIONS ========== -->
+  <!-- 3V3 from Pico to top rail -->
+  <line x1="766" y1="350" x2="800" y2="350" stroke="#C0392B" stroke-width="2"/>
+  <line x1="800" y1="350" x2="800" y2="72" stroke="#C0392B" stroke-width="2"/>
+  <circle cx="800" cy="72" r="3" fill="#C0392B"/>
+
+  <!-- GND from Pico to bottom rail -->
+  <line x1="766" y1="455" x2="800" y2="455" stroke="#555" stroke-width="2"/>
+  <line x1="800" y1="455" x2="800" y2="732" stroke="#555" stroke-width="2"/>
+  <circle cx="800" cy="732" r="3" fill="#555"/>
+
+  <!-- GND from Pico left to top rail -->
+  <line x1="434" y1="435" x2="400" y2="435" stroke="#555" stroke-width="2"/>
+  <line x1="400" y1="435" x2="400" y2="94" stroke="#555" stroke-width="2"/>
+  <circle cx="400" cy="94" r="3" fill="#555"/>
+
+  <!-- ========== COLOR LEGEND ========== -->
+  <rect x="430" y="490" width="340" height="70" rx="4" fill="#f9f9f9" stroke="#ddd" stroke-width="1"/>
+  <text x="600" y="508" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333" font-weight="bold">Wire Color Key</text>
+  <!-- Red = buttons -->
+  <line x1="450" y1="525" x2="475" y2="525" stroke="#E74C3C" stroke-width="3"/>
+  <text x="480" y="529" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">Buttons</text>
+  <!-- Gold = audio -->
+  <line x1="540" y1="525" x2="565" y2="525" stroke="#F39C12" stroke-width="3"/>
+  <text x="570" y="529" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">Audio</text>
+  <!-- Blue = ADC -->
+  <line x1="620" y1="525" x2="645" y2="525" stroke="#3498DB" stroke-width="3"/>
+  <text x="650" y="529" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">ADC</text>
+  <!-- Dark red = power -->
+  <line x1="690" y1="525" x2="715" y2="525" stroke="#C0392B" stroke-width="3"/>
+  <text x="720" y="529" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">3.3V</text>
+  <!-- Gray = GND -->
+  <line x1="450" y1="545" x2="475" y2="545" stroke="#555" stroke-width="3"/>
+  <text x="480" y="549" font-family="Arial, Helvetica, sans-serif" font-size="9" fill="#555">GND</text>
+
+  <!-- ========== COMPONENT COUNTS ========== -->
+  <rect x="430" y="570" width="340" height="50" rx="4" fill="#FEF9E7" stroke="#F39C12" stroke-width="1"/>
+  <text x="600" y="588" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10" fill="#333" font-weight="bold">Bill of Materials</text>
+  <text x="600" y="604" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#555">4x Buttons | 2x 10k Pots | 1x LDR | 1x 10k\u03A9 | 1x Speaker | Jumper wires</text>
+
+  <!-- GP4/GP5 shared note -->
+  <rect x="140" y="520" width="210" height="35" rx="3" fill="#E8F8F5" stroke="#2ECC71" stroke-width="1"/>
+  <text x="245" y="535" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#333" font-weight="bold">Note: GP4/GP5 shared with I2C</text>
+  <text x="245" y="547" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8" fill="#555">Use buttons OR VL53L0X, not both</text>
+</svg>

@@ -1,0 +1,1 @@
+Build your own synthesizer with a Raspberry Pi Pico 2. Learn embedded systems, analog input, and real-time audio synthesis by creating instruments from scratch. No prior experience required.

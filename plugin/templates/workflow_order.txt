@@ -1,0 +1,13 @@
+Recommended execution order
+
+1. architecture
+2. synth firmware
+3. MIDI firmware
+4. visuals
+5. slides
+6. docs and handouts
+7. BOM and flyers
+8. web config generator
+9. validation and repair
+
+After each step, save files before moving on.
