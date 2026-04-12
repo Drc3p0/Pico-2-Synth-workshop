@@ -3,58 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pico Music Workshop — Config Generator</title>
+  <title>Pico 2 Synth Workshop</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Header -->
-  <header class="header">
-    <h1>Pico Music Workshop &mdash; Config Generator</h1>
-    <p>Pick your track, tweak the options, copy the code to your Pico.</p>
+  <header class="site-header">
+    <h1>Pico 2 Synth Workshop</h1>
+    <p class="subtitle">Build, play, and configure your synthesizer</p>
   </header>
 
-  <main class="container">
+  <nav class="tab-bar" role="tablist">
+    <button class="tab active" data-tab="play" role="tab" aria-selected="true">Play Synth</button>
+    <button class="tab" data-tab="config" role="tab" aria-selected="false">Config Generator</button>
+  </nav>
 
-    <!-- Step 1: Choose Track -->
-    <section class="step-card">
-      <span class="step-number">Step 1</span>
-      <h2>Choose Your Track</h2>
-      <div class="track-picker">
-        <button class="track-btn" id="track-synth" type="button">
-          <span class="icon">&#127932;</span>
-          <span class="label">Synth</span>
-          <span class="desc">Build sounds from scratch with sensors</span>
-        </button>
-        <button class="track-btn" id="track-midi" type="button">
-          <span class="icon">&#127929;</span>
-          <span class="label">MIDI</span>
-          <span class="desc">Control external synths &amp; software</span>
-        </button>
+  <!-- ================================================================ -->
+  <!-- TAB 1: PLAYABLE SYNTH                                           -->
+  <!-- ================================================================ -->
+  <main id="tab-play" class="tab-panel active">
+
+    <!-- Voice selector -->
+    <section class="card voice-selector">
+      <h2>Voice</h2>
+      <div class="voice-buttons" id="voice-buttons"></div>
+    </section>
+
+    <!-- Keyboard -->
+    <section class="card keyboard-section">
+      <h2>Keyboard <span class="hint">(click, tap, or use keys A&ndash;L)</span></h2>
+      <div class="keyboard" id="keyboard"></div>
+      <div class="keyboard-settings">
+        <label>Scale
+          <select id="play-scale">
+            <option value="pentatonic">Pentatonic</option>
+            <option value="major">Major</option>
+            <option value="minor">Minor</option>
+            <option value="blues">Blues</option>
+            <option value="chromatic">Chromatic</option>
+          </select>
+        </label>
+        <label>Octave
+          <input type="range" id="play-octave" min="1" max="7" value="3">
+          <span id="play-octave-val">3</span>
+        </label>
       </div>
     </section>
 
-    <!-- Step 2a: Synth Options -->
-    <section class="step-card synth-options hidden" id="synth-options">
-      <span class="step-number">Step 2</span>
-      <h2>Synth Options</h2>
-      <div id="synth-options-body"></div>
+    <!-- FX Controls -->
+    <section class="card fx-section">
+      <h2>Effects</h2>
+      <div class="fx-grid">
+        <div class="fx-group">
+          <h3>Filter</h3>
+          <label>Cutoff <span id="val-filter-freq">2000</span> Hz
+            <input type="range" id="fx-filter-freq" min="100" max="8000" value="2000" step="10">
+          </label>
+          <label>Resonance <span id="val-filter-q">1.0</span>
+            <input type="range" id="fx-filter-q" min="0.5" max="6.0" value="1.0" step="0.1">
+          </label>
+        </div>
+        <div class="fx-group">
+          <h3>Echo</h3>
+          <label>Mix <span id="val-echo-mix">0%</span>
+            <input type="range" id="fx-echo-mix" min="0" max="100" value="0">
+          </label>
+          <label>Delay <span id="val-echo-delay">250</span> ms
+            <input type="range" id="fx-echo-delay" min="30" max="800" value="250" step="5">
+          </label>
+          <label>Decay <span id="val-echo-decay">35%</span>
+            <input type="range" id="fx-echo-decay" min="0" max="100" value="35">
+          </label>
+        </div>
+        <div class="fx-group">
+          <h3>Reverb</h3>
+          <label>Mix <span id="val-reverb-mix">0%</span>
+            <input type="range" id="fx-reverb-mix" min="0" max="100" value="0">
+          </label>
+          <label>Room <span id="val-reverb-room">50%</span>
+            <input type="range" id="fx-reverb-room" min="0" max="100" value="50">
+          </label>
+        </div>
+        <div class="fx-group">
+          <h3>Distortion</h3>
+          <label>Mix <span id="val-dist-mix">0%</span>
+            <input type="range" id="fx-dist-mix" min="0" max="100" value="0">
+          </label>
+          <label>Drive <span id="val-dist-drive">0%</span>
+            <input type="range" id="fx-dist-drive" min="0" max="100" value="0">
+          </label>
+        </div>
+        <div class="fx-group">
+          <h3>Vibrato</h3>
+          <label>Depth <span id="val-vib-depth">0%</span>
+            <input type="range" id="fx-vib-depth" min="0" max="100" value="0">
+          </label>
+          <label>Rate <span id="val-vib-rate">5.0</span> Hz
+            <input type="range" id="fx-vib-rate" min="0" max="20" value="5" step="0.1">
+          </label>
+        </div>
+        <div class="fx-group">
+          <h3>Envelope</h3>
+          <label>Attack <span id="val-attack">0.01</span>s
+            <input type="range" id="fx-attack" min="0" max="1500" value="10">
+          </label>
+          <label>Decay <span id="val-decay">200</span>ms
+            <input type="range" id="fx-decay" min="10" max="2000" value="200">
+          </label>
+          <label>Sustain <span id="val-sustain">70%</span>
+            <input type="range" id="fx-sustain" min="0" max="100" value="70">
+          </label>
+          <label>Release <span id="val-release">0.20</span>s
+            <input type="range" id="fx-release" min="10" max="3000" value="200">
+          </label>
+        </div>
+      </div>
     </section>
 
-    <!-- Step 2b: MIDI Options -->
-    <section class="step-card midi-options hidden" id="midi-options">
-      <span class="step-number">Step 2</span>
-      <h2>MIDI Options</h2>
-      <div id="midi-options-body"></div>
+    <section class="card">
+      <label>Master Volume <span id="val-volume">80%</span>
+        <input type="range" id="fx-volume" min="0" max="100" value="80">
+      </label>
     </section>
 
-    <!-- Step 3 & 4: Code Output -->
-    <section class="step-card code-step hidden" id="code-step">
-      <span class="step-number">Step 3</span>
-      <h2>Your code.py</h2>
-      <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.75rem;">
-        Copy this code to the <strong>code.py</strong> file on your Pico.
-      </p>
+  </main>
+
+  <!-- ================================================================ -->
+  <!-- TAB 2: CONFIG GENERATOR                                         -->
+  <!-- ================================================================ -->
+  <main id="tab-config" class="tab-panel">
+
+    <section class="card" id="config-options">
+      <h2>Build Your Config</h2>
+      <div id="config-options-body"></div>
+    </section>
+
+    <section class="card" id="code-step">
       <div class="code-output">
         <div class="code-header">
           <span class="filename">code.py</span>
@@ -71,9 +155,11 @@
 
   </main>
 
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
+  <div id="toast" class="toast"></div>
 
+  <script src="synth-engine.js"></script>
+  <script src="synth-ui.js"></script>
+  <script src="config-generator.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

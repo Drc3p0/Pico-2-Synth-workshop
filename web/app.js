@@ -1,229 +1,37 @@
-// ============================================
-// Pico Music Workshop — Config Generator
-// No dependencies. Pure vanilla JS.
-// ============================================
+// ============================================================
+// App -- Tab switching, copy/download, initialization
+// Depends on: SynthEngine, SynthUI, ConfigGenerator
+// ============================================================
 
 (function () {
   "use strict";
 
-  // --- Constants ---
+  function $(sel) { return document.querySelector(sel); }
 
-  var NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  // --- Tab switching -------------------------------------------------------
 
-  var SCALES = {
-    pentatonic: [0, 2, 4, 7, 9],
-    major: [0, 2, 4, 5, 7, 9, 11],
-    minor: [0, 2, 3, 5, 7, 8, 10],
-    blues: [0, 3, 5, 6, 7, 10],
-    chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-  };
-
-  var PATCHES = [
-    { value: "pad", label: "Pad", desc: "Smooth, sustained chords" },
-    { value: "bass", label: "Bass", desc: "Deep, punchy low end" },
-    { value: "pluck", label: "Pluck", desc: "Short, snappy notes" },
-    { value: "lead", label: "Lead", desc: "Bright, singing melody" },
-  ];
-
-  var SCALE_OPTIONS = [
-    { value: "pentatonic", label: "Pentatonic", desc: "5 notes \u2014 always sounds good" },
-    { value: "major", label: "Major", desc: "7 notes \u2014 happy, bright" },
-    { value: "minor", label: "Minor", desc: "7 notes \u2014 moody, emotional" },
-    { value: "blues", label: "Blues", desc: "6 notes \u2014 soulful, gritty" },
-    { value: "chromatic", label: "Chromatic", desc: "12 notes \u2014 all of them" },
-  ];
-
-  var SYNTH_POT_A = [
-    { value: "filter", label: "Filter cutoff" },
-    { value: "volume", label: "Volume" },
-    { value: "pitch", label: "Pitch" },
-  ];
-
-  var SYNTH_POT_B = [
-    { value: "echo_mix", label: "Echo mix" },
-    { value: "reverb_mix", label: "Reverb mix" },
-    { value: "distortion_drive", label: "Distortion drive" },
-  ];
-
-  var SYNTH_LDR = [
-    { value: "vibrato_depth", label: "Vibrato depth" },
-    { value: "reverb_room", label: "Reverb room size" },
-    { value: "filter_freq", label: "Filter frequency" },
-  ];
-
-  var SYNTH_TOF = [
-    { value: "pitch_bend", label: "Pitch bend" },
-    { value: "filter_freq", label: "Filter frequency" },
-    { value: "volume", label: "Volume" },
-  ];
-
-  var CC_HINTS = {
-    1: "Mod Wheel", 7: "Volume", 10: "Pan", 11: "Expression",
-    64: "Sustain", 71: "Resonance", 74: "Cutoff", 91: "Reverb",
-    93: "Chorus",
-  };
-
-  // --- State ---
-
-  var state = {
-    track: null,
-    synth: {
-      patch: "pad",
-      scale: "pentatonic",
-      base_note: 48,
-      pot_a: "filter",
-      pot_b: "echo_mix",
-      ldr: "vibrato_depth",
-      tof: "pitch_bend",
-    },
-    midi: {
-      channel: 1,
-      button_notes: [60, 62, 64, 67],
-      pot_a_cc: 1,
-      pot_b_cc: 7,
-      ldr_cc: 74,
-      tof_cc: 11,
-      velocity: 100,
-    },
-  };
-
-  // --- Helpers ---
-
-  function midiToNoteName(midi) {
-    if (isNaN(midi) || midi < 0 || midi > 127) return "?";
-    var octave = Math.floor(midi / 12) - 1;
-    var note = NOTE_NAMES[midi % 12];
-    return note + octave;
-  }
-
-  function ccHint(num) {
-    return CC_HINTS[num] || "";
-  }
-
-  function $(sel) {
-    return document.querySelector(sel);
-  }
-
-  function $all(sel) {
-    return document.querySelectorAll(sel);
-  }
-
-  function escapeHtml(str) {
-    return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  }
-
-  // --- Syntax Highlighting (basic) ---
-
-  function highlightPython(code) {
-    var lines = code.split("\n");
-    var result = [];
-    for (var i = 0; i < lines.length; i++) {
-      var line = escapeHtml(lines[i]);
-
-      // Full-line comments
-      if (/^\s*#/.test(lines[i])) {
-        result.push('<span class="syn-comment">' + line + "</span>");
-        continue;
-      }
-
-      // Extract strings first into placeholders (avoids regex collision)
-      var strings = [];
-      line = line.replace(/"([^"]*)"/g, function (m) {
-        strings.push('<span class="syn-string">' + m + "</span>");
-        return "\x00S" + (strings.length - 1) + "\x00";
-      });
-
-      // Keywords (safe now — no embedded quotes)
-      line = line.replace(/\b(from|import|True|False|None)\b/g, '<span class="syn-keyword">$1</span>');
-
-      // Numbers (standalone, after [ , ( or line start)
-      line = line.replace(/([\[, (])(\d+)/g, '$1<span class="syn-number">$2</span>');
-
-      // Restore strings
-      line = line.replace(/\x00S(\d+)\x00/g, function (m, idx) {
-        return strings[parseInt(idx)];
-      });
-
-      result.push(line);
+  function switchTab(tabName) {
+    // Update tab buttons
+    var tabs = document.querySelectorAll(".tab");
+    for (var i = 0; i < tabs.length; i++) {
+      var active = tabs[i].getAttribute("data-tab") === tabName;
+      tabs[i].classList.toggle("active", active);
+      tabs[i].setAttribute("aria-selected", active ? "true" : "false");
     }
-    return result.join("\n");
+
+    // Update panels
+    var panels = document.querySelectorAll(".tab-panel");
+    for (var j = 0; j < panels.length; j++) {
+      panels[j].classList.toggle("active", panels[j].id === "tab-" + tabName);
+    }
+
+    // Init config panel on first view
+    if (tabName === "config") {
+      ConfigGenerator.render();
+    }
   }
 
-  // --- Code Generation ---
-
-  function generateSynthCode() {
-    var s = state.synth;
-    var scaleArr = JSON.stringify(SCALES[s.scale]);
-    return [
-      "# ============================================",
-      "# PICO MUSIC WORKSHOP \u2014 Synth Track",
-      "# Generated by Config Tool",
-      "# ============================================",
-      "",
-      "CONFIG = {",
-      '    "patch": "' + s.patch + '",',
-      '    "scale": ' + scaleArr + ",",
-      '    "base_note": ' + s.base_note + ",",
-      '    "pot_a_controls": "' + s.pot_a + '",',
-      '    "pot_b_controls": "' + s.pot_b + '",',
-      '    "ldr_controls": "' + s.ldr + '",',
-      '    "tof_controls": "' + s.tof + '",',
-      "}",
-      "",
-      "# ============================================",
-      "# Engine (don't edit below this line)",
-      "# ============================================",
-      "from lib.synth_engine import SynthEngine",
-      "engine = SynthEngine(CONFIG)",
-      "engine.run()",
-      "",
-    ].join("\n");
-  }
-
-  function generateMidiCode() {
-    var m = state.midi;
-    var ch = m.channel - 1;
-    var notes = "[" + m.button_notes.join(", ") + "]";
-    return [
-      "# ============================================",
-      "# PICO MUSIC WORKSHOP \u2014 MIDI Controller Track",
-      "# Generated by Config Tool",
-      "# ============================================",
-      "",
-      "CONFIG = {",
-      '    "midi_channel": ' + ch + ",",
-      '    "button_notes": ' + notes + ",",
-      '    "pot_a_cc": ' + m.pot_a_cc + ",",
-      '    "pot_b_cc": ' + m.pot_b_cc + ",",
-      '    "ldr_cc": ' + m.ldr_cc + ",",
-      '    "tof_cc": ' + m.tof_cc + ",",
-      '    "velocity": ' + m.velocity + ",",
-      "}",
-      "",
-      "# ============================================",
-      "# Engine (don't edit below this line)",
-      "# ============================================",
-      "from lib.midi_engine import MIDIEngine",
-      "engine = MIDIEngine(CONFIG)",
-      "engine.run()",
-      "",
-    ].join("\n");
-  }
-
-  function getCode() {
-    if (state.track === "synth") return generateSynthCode();
-    if (state.track === "midi") return generateMidiCode();
-    return "# Choose a track above to get started!";
-  }
-
-  // --- Rendering ---
-
-  function updateCodePreview() {
-    var raw = getCode();
-    var pre = $("#code-preview");
-    if (!pre) return;
-    pre.innerHTML = highlightPython(raw);
-  }
+  // --- Toast ---------------------------------------------------------------
 
   function showToast(msg) {
     var t = $("#toast");
@@ -232,274 +40,10 @@
     setTimeout(function () { t.classList.remove("show"); }, 2000);
   }
 
-  // --- Build UI helpers ---
-
-  function buildRadioGroup(name, options, selected) {
-    var html = '<div class="radio-group">';
-    for (var i = 0; i < options.length; i++) {
-      var o = options[i];
-      var checked = o.value === selected ? " checked" : "";
-      var descHtml = o.desc
-        ? '<span class="radio-desc">' + escapeHtml(o.desc) + "</span>"
-        : "";
-      html += '<label>';
-      html += '<input type="radio" name="' + name + '" value="' + o.value + '"' + checked + ">";
-      html += '<span class="radio-label">' + escapeHtml(o.label);
-      if (descHtml) html += "<br>" + descHtml;
-      html += "</span></label>";
-    }
-    html += "</div>";
-    return html;
-  }
-
-  function buildSelect(id, options, selected) {
-    var html = '<select id="' + id + '">';
-    for (var i = 0; i < options.length; i++) {
-      var o = options[i];
-      var sel = o.value === selected ? " selected" : "";
-      html += '<option value="' + o.value + '"' + sel + ">" + escapeHtml(o.label) + "</option>";
-    }
-    html += "</select>";
-    return html;
-  }
-
-  function buildNoteInput(id, label, value) {
-    return '<div class="input-group">' +
-      '<label for="' + id + '">' + escapeHtml(label) + "</label>" +
-      '<input type="number" id="' + id + '" min="0" max="127" value="' + value + '">' +
-      '<span class="note-display" id="' + id + '_note">' + midiToNoteName(value) + "</span>" +
-      "</div>";
-  }
-
-  function buildCCInput(id, label, value) {
-    var hint = ccHint(value);
-    var hintText = hint ? " (" + hint + ")" : "";
-    return '<div class="input-group">' +
-      '<label for="' + id + '">' + escapeHtml(label) + "</label>" +
-      '<input type="number" id="' + id + '" min="0" max="127" value="' + value + '">' +
-      '<span class="note-display" id="' + id + '_hint">' + escapeHtml(hintText) + "</span>" +
-      "</div>";
-  }
-
-  // --- Synth Options Panel ---
-
-  function renderSynthOptions() {
-    var s = state.synth;
-    var html = "";
-
-    html += '<div class="form-section"><h3>Patch (sound type)</h3>';
-    html += buildRadioGroup("patch", PATCHES, s.patch);
-    html += "</div>";
-
-    html += '<div class="form-section"><h3>Scale</h3>';
-    html += '<p class="hint">Which notes are available? Pentatonic is the safest pick.</p>';
-    html += buildRadioGroup("scale", SCALE_OPTIONS, s.scale);
-    html += "</div>";
-
-    html += '<div class="form-section"><h3>Base Note</h3>';
-    html += '<p class="hint">The lowest note in your range.</p>';
-    html += '<div class="slider-container"><div class="slider-row">';
-    html += '<input type="range" id="base_note" min="36" max="72" value="' + s.base_note + '">';
-    html += '<span class="slider-value" id="base_note_display">' + s.base_note + " \u2014 " + midiToNoteName(s.base_note) + "</span>";
-    html += "</div></div></div>";
-
-    html += '<hr class="form-separator">';
-
-    html += '<div class="form-section"><h3>Sensor Mapping</h3>';
-    html += '<p class="hint">Choose what each sensor controls.</p>';
-    html += '<div class="input-row">';
-    html += '<div class="input-group"><label>Pot A (knob)</label>' + buildSelect("pot_a", SYNTH_POT_A, s.pot_a) + "</div>";
-    html += '<div class="input-group"><label>Pot B (knob)</label>' + buildSelect("pot_b", SYNTH_POT_B, s.pot_b) + "</div>";
-    html += "</div>";
-    html += '<div class="input-row" style="margin-top:0.75rem">';
-    html += '<div class="input-group"><label>LDR (light sensor)</label>' + buildSelect("ldr", SYNTH_LDR, s.ldr) + "</div>";
-    html += '<div class="input-group"><label>ToF (distance sensor)</label>' + buildSelect("tof", SYNTH_TOF, s.tof) + "</div>";
-    html += "</div></div>";
-
-    return html;
-  }
-
-  // --- MIDI Options Panel ---
-
-  function renderMidiOptions() {
-    var m = state.midi;
-    var html = "";
-
-    html += '<div class="form-section"><h3>MIDI Channel</h3>';
-    html += '<p class="hint">Most devices use channel 1. Check your synth/DAW if unsure.</p>';
-    html += '<select id="midi_channel">';
-    for (var i = 1; i <= 16; i++) {
-      var sel = i === m.channel ? " selected" : "";
-      html += '<option value="' + i + '"' + sel + '>Channel ' + i + "</option>";
-    }
-    html += "</select></div>";
-
-    html += '<div class="form-section"><h3>Button Notes</h3>';
-    html += '<p class="hint">MIDI note number for each button (0\u2013127). Common: C3=48, C4=60, C5=72.</p>';
-    html += '<div class="input-row">';
-    html += buildNoteInput("btn_1", "Button 1", m.button_notes[0]);
-    html += buildNoteInput("btn_2", "Button 2", m.button_notes[1]);
-    html += "</div>";
-    html += '<div class="input-row" style="margin-top:0.75rem">';
-    html += buildNoteInput("btn_3", "Button 3", m.button_notes[2]);
-    html += buildNoteInput("btn_4", "Button 4", m.button_notes[3]);
-    html += "</div></div>";
-
-    html += '<hr class="form-separator">';
-
-    html += '<div class="form-section"><h3>CC Assignments</h3>';
-    html += '<p class="hint">Control Change numbers (0\u2013127). Common: 1=Mod, 7=Volume, 74=Cutoff.</p>';
-    html += '<div class="input-row">';
-    html += buildCCInput("pot_a_cc", "Pot A (knob)", m.pot_a_cc);
-    html += buildCCInput("pot_b_cc", "Pot B (knob)", m.pot_b_cc);
-    html += "</div>";
-    html += '<div class="input-row" style="margin-top:0.75rem">';
-    html += buildCCInput("ldr_cc", "LDR (light)", m.ldr_cc);
-    html += buildCCInput("tof_cc", "ToF (distance)", m.tof_cc);
-    html += "</div></div>";
-
-    html += '<hr class="form-separator">';
-
-    html += '<div class="form-section"><h3>Note Velocity</h3>';
-    html += '<p class="hint">How hard the buttons press. 100 is a good default.</p>';
-    html += '<div class="slider-container"><div class="slider-row">';
-    html += '<input type="range" id="velocity" min="1" max="127" value="' + m.velocity + '">';
-    html += '<span class="slider-value" id="velocity_display">' + m.velocity + "</span>";
-    html += "</div></div></div>";
-
-    return html;
-  }
-
-  // --- Event Binding ---
-
-  function bindSynthEvents() {
-    $all('input[name="patch"]').forEach(function (r) {
-      r.addEventListener("change", function () {
-        state.synth.patch = this.value;
-        updateCodePreview();
-      });
-    });
-
-    $all('input[name="scale"]').forEach(function (r) {
-      r.addEventListener("change", function () {
-        state.synth.scale = this.value;
-        updateCodePreview();
-      });
-    });
-
-    var baseSlider = $("#base_note");
-    if (baseSlider) {
-      baseSlider.addEventListener("input", function () {
-        var v = parseInt(this.value);
-        state.synth.base_note = v;
-        $("#base_note_display").textContent = v + " \u2014 " + midiToNoteName(v);
-        updateCodePreview();
-      });
-    }
-
-    ["pot_a", "pot_b", "ldr", "tof"].forEach(function (key) {
-      var el = $("#" + key);
-      if (el) {
-        el.addEventListener("change", function () {
-          state.synth[key] = this.value;
-          updateCodePreview();
-        });
-      }
-    });
-  }
-
-  function bindMidiEvents() {
-    var chSel = $("#midi_channel");
-    if (chSel) {
-      chSel.addEventListener("change", function () {
-        state.midi.channel = parseInt(this.value);
-        updateCodePreview();
-      });
-    }
-
-    ["btn_1", "btn_2", "btn_3", "btn_4"].forEach(function (id, idx) {
-      var el = $("#" + id);
-      if (el) {
-        el.addEventListener("input", function () {
-          var v = Math.max(0, Math.min(127, parseInt(this.value) || 0));
-          state.midi.button_notes[idx] = v;
-          var noteEl = $("#" + id + "_note");
-          if (noteEl) noteEl.textContent = midiToNoteName(v);
-          updateCodePreview();
-        });
-      }
-    });
-
-    ["pot_a_cc", "pot_b_cc", "ldr_cc", "tof_cc"].forEach(function (key) {
-      var el = $("#" + key);
-      if (el) {
-        el.addEventListener("input", function () {
-          var v = Math.max(0, Math.min(127, parseInt(this.value) || 0));
-          state.midi[key] = v;
-          var hintEl = $("#" + key + "_hint");
-          if (hintEl) {
-            var h = ccHint(v);
-            hintEl.textContent = h ? " (" + h + ")" : "";
-          }
-          updateCodePreview();
-        });
-      }
-    });
-
-    var velSlider = $("#velocity");
-    if (velSlider) {
-      velSlider.addEventListener("input", function () {
-        var v = parseInt(this.value);
-        state.midi.velocity = v;
-        $("#velocity_display").textContent = v;
-        updateCodePreview();
-      });
-    }
-  }
-
-  // --- Track Selection ---
-
-  function selectTrack(track) {
-    state.track = track;
-
-    $all(".track-btn").forEach(function (b) {
-      b.classList.remove("selected-synth", "selected-midi");
-    });
-    if (track === "synth") {
-      $("#track-synth").classList.add("selected-synth");
-    } else {
-      $("#track-midi").classList.add("selected-midi");
-    }
-
-    var synthPanel = $("#synth-options");
-    var midiPanel = $("#midi-options");
-    var codeStep = $("#code-step");
-
-    if (track === "synth") {
-      synthPanel.classList.remove("hidden");
-      midiPanel.classList.add("hidden");
-      $("#synth-options-body").innerHTML = renderSynthOptions();
-      bindSynthEvents();
-    } else {
-      midiPanel.classList.remove("hidden");
-      synthPanel.classList.add("hidden");
-      $("#midi-options-body").innerHTML = renderMidiOptions();
-      bindMidiEvents();
-    }
-
-    codeStep.classList.remove("hidden");
-    updateCodePreview();
-
-    var targetPanel = track === "synth" ? synthPanel : midiPanel;
-    setTimeout(function () {
-      targetPanel.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 50);
-  }
-
-  // --- Copy & Download ---
+  // --- Copy & Download -----------------------------------------------------
 
   function copyToClipboard() {
-    var code = getCode();
+    var code = ConfigGenerator.getRawCode();
     var btn = $("#btn-copy");
 
     function onSuccess() {
@@ -536,7 +80,7 @@
   }
 
   function downloadCode() {
-    var code = getCode();
+    var code = ConfigGenerator.getRawCode();
     var blob = new Blob([code], { type: "text/plain" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
@@ -549,14 +93,25 @@
     showToast("Downloading code.py\u2026");
   }
 
-  // --- Init ---
+  // --- Init ----------------------------------------------------------------
 
   function init() {
-    $("#track-synth").addEventListener("click", function () { selectTrack("synth"); });
-    $("#track-midi").addEventListener("click", function () { selectTrack("midi"); });
-    $("#btn-copy").addEventListener("click", copyToClipboard);
-    $("#btn-download").addEventListener("click", downloadCode);
-    updateCodePreview();
+    // Tab buttons
+    var tabs = document.querySelectorAll(".tab");
+    for (var i = 0; i < tabs.length; i++) {
+      tabs[i].addEventListener("click", function () {
+        switchTab(this.getAttribute("data-tab"));
+      });
+    }
+
+    // Copy/download
+    var copyBtn = $("#btn-copy");
+    if (copyBtn) copyBtn.addEventListener("click", copyToClipboard);
+    var dlBtn = $("#btn-download");
+    if (dlBtn) dlBtn.addEventListener("click", downloadCode);
+
+    // Init synth UI (play tab is active by default)
+    SynthUI.init();
   }
 
   if (document.readyState === "loading") {

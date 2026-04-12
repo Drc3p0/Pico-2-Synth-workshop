@@ -1,3 +1,13 @@
+"""Audio effects chain for the Pico 2 Synth.
+
+Signal path:  synthio.Synthesizer -> Distortion -> Echo -> Freeverb -> Mixer -> PWM out
+
+All effect parameters are individually settable so any input (pot, LDR,
+ToF, accelerometer axis, etc.) can be routed to any parameter via the
+engine's mapping system.
+"""
+
+
 def clamp(value, minimum, maximum):
     if minimum > maximum:
         minimum, maximum = maximum, minimum
@@ -53,6 +63,7 @@ class EffectsChain:
 
         self.mixer = audiomixer.Mixer(voice_count=1, **self.cfg)
 
+        # LFOs for subtle animation of effect parameters
         self._echo_mix_lfo = synthio.LFO(rate=0.11, scale=0.0, offset=0.0)
         self._reverb_room_lfo = synthio.LFO(rate=0.07, scale=0.0, offset=0.5)
         self._dist_drive_lfo = synthio.LFO(rate=0.14, scale=0.0, offset=0.0)
@@ -81,6 +92,8 @@ class EffectsChain:
             **self.cfg
         )
 
+    # --- Internal helpers ---------------------------------------------------
+
     def _set_attr(self, obj, attr_name, value):
         try:
             setattr(obj, attr_name, value)
@@ -98,6 +111,8 @@ class EffectsChain:
             return target
         return lfo
 
+    # --- Chain setup --------------------------------------------------------
+
     def build_chain(self, synth):
         try:
             self.distortion.play(synth)
@@ -110,11 +125,21 @@ class EffectsChain:
         self.mixer.voice[0].level = 1.0
         return self.mixer
 
+    # --- Individual parameter setters (all normalized 0.0-1.0 input) --------
+
+    # Echo
     def set_echo_mix(self, value):
         mod = self._set_lfo_target(self._echo_mix_lfo, value)
         if mod is not self._echo_mix_lfo:
             self._set_attr(self.echo, "mix", mod)
 
+    def set_echo_delay_ms(self, delay_ms):
+        self._set_attr(self.echo, "delay_ms", clamp(float(delay_ms), 10.0, 900.0))
+
+    def set_echo_decay(self, decay):
+        self._set_attr(self.echo, "decay", clamp(float(decay), 0.0, 1.0))
+
+    # Reverb
     def set_reverb_mix(self, value):
         self._set_attr(self.reverb, "mix", clamp(float(value), 0.0, 1.0))
 
@@ -123,6 +148,10 @@ class EffectsChain:
         if mod is not self._reverb_room_lfo:
             self._set_attr(self.reverb, "roomsize", mod)
 
+    def set_reverb_damp(self, value):
+        self._set_attr(self.reverb, "damp", clamp(float(value), 0.0, 1.0))
+
+    # Distortion
     def set_distortion_mix(self, value):
         self._set_attr(self.distortion, "mix", clamp(float(value), 0.0, 1.0))
 
@@ -131,11 +160,7 @@ class EffectsChain:
         if mod is not self._dist_drive_lfo:
             self._set_attr(self.distortion, "drive", mod)
 
-    def set_echo_delay_ms(self, delay_ms):
-        self._set_attr(self.echo, "delay_ms", max(10.0, float(delay_ms)))
-
-    def set_echo_decay(self, decay):
-        self._set_attr(self.echo, "decay", clamp(float(decay), 0.0, 1.0))
+    # --- Batch update from a voice/patch dict -------------------------------
 
     def update_from_patch(self, patch_dict):
         self.set_echo_mix(patch_dict.get("echo_mix", 0.0))
@@ -148,9 +173,10 @@ class EffectsChain:
         self.set_distortion_mix(patch_dict.get("distortion_mix", 0.0))
         self.set_distortion_drive(patch_dict.get("distortion_drive", 0.0))
 
+    # --- Legacy convenience -------------------------------------------------
+
     def update_from_sensors(self, pot_b_normalized, ldr_normalized):
         if pot_b_normalized is not None:
             self.set_echo_mix(pot_b_normalized)
-
         if ldr_normalized is not None:
             self.set_reverb_roomsize(ldr_normalized)
