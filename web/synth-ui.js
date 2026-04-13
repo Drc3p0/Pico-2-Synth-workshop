@@ -1,6 +1,7 @@
 // ============================================================
 // Synth UI -- Keyboard, voice selector, FX controls, loop, drone
-// Depends on SynthEngine (synth-engine.js)
+// Now includes inline pin assignment dropdowns for each key and FX slider.
+// Depends on SynthEngine, AppState
 // ============================================================
 
 var SynthUI = (function () {
@@ -8,8 +9,6 @@ var SynthUI = (function () {
 
   var KEY_MAP = ["a","s","d","f","g","h","j","k","l",";","'","\\"];
   var NUM_KEYS = 12;
-  var currentScale = "pentatonic";
-  var currentOctave = 3;
   var currentNotes = [];
   var keyHeld = {};
 
@@ -39,19 +38,47 @@ var SynthUI = (function () {
 
   function selectVoice(index) {
     var newIdx = SynthEngine.setVoice(index);
+    AppState.set("voiceIndex", newIdx);
     var btns = document.querySelectorAll(".voice-btn");
     for (var i = 0; i < btns.length; i++) {
       btns[i].classList.toggle("active", i === newIdx);
     }
     syncSlidersFromEngine();
-    renderKeyboard(); // re-render for drum labels
+    renderKeyboard();
   }
 
-  // --- Keyboard rendering --------------------------------------------------
+  // --- Keyboard rendering with inline pin assignments ----------------------
 
   function updateNotes() {
-    var baseNote = currentOctave * 12 + 24;
-    currentNotes = SynthEngine.scaleNotes(currentScale, baseNote, NUM_KEYS);
+    var scale = AppState.get("scale");
+    var octave = AppState.get("octave");
+    var baseNote = octave * 12 + 24;
+    currentNotes = SynthEngine.scaleNotes(scale, baseNote, NUM_KEYS);
+  }
+
+  function _buildKeyAssignSelect(keyIdx) {
+    var ka = AppState.get("keyAssignments")[keyIdx];
+    var type = ka ? ka.type : "none";
+    var pin = ka ? ka.pin : 0;
+
+    var html = '<div class="key-assign">';
+    html += '<select class="key-assign-type" data-key="' + keyIdx + '">';
+    html += '<option value="none"' + (type === "none" ? " selected" : "") + '>None</option>';
+    html += '<option value="button"' + (type === "button" ? " selected" : "") + '>Button</option>';
+    html += '<option value="touch"' + (type === "touch" ? " selected" : "") + '>Touch</option>';
+    html += '</select>';
+
+    if (type !== "none") {
+      html += '<select class="key-assign-pin" data-key="' + keyIdx + '">';
+      var pins = AppState.DIGITAL_PINS;
+      for (var i = 0; i < pins.length; i++) {
+        var sel = pins[i] === pin ? " selected" : "";
+        html += '<option value="' + pins[i] + '"' + sel + '>GP' + pins[i] + '</option>';
+      }
+      html += '</select>';
+    }
+    html += '</div>';
+    return html;
   }
 
   function renderKeyboard() {
@@ -65,13 +92,17 @@ var SynthUI = (function () {
       var midi = currentNotes[i];
       var topLabel = isDrum ? drumLabels[i] : SynthEngine.midiToNoteName(midi);
       var keyLabel = KEY_MAP[i] ? KEY_MAP[i].toUpperCase() : "";
+      html += '<div class="key-column">';
       html += '<button class="key" data-index="' + i + '" data-midi="' + midi + '">'
             + '<span class="key-note">' + topLabel + '</span>'
             + '<span class="key-bind">' + keyLabel + '</span>'
             + '</button>';
+      html += _buildKeyAssignSelect(i);
+      html += '</div>';
     }
     container.innerHTML = html;
     bindKeyboardClicks();
+    bindKeyAssignments();
   }
 
   function bindKeyboardClicks() {
@@ -100,6 +131,28 @@ var SynthUI = (function () {
     }
   }
 
+  function bindKeyAssignments() {
+    // Type selector
+    document.querySelectorAll(".key-assign-type").forEach(function (el) {
+      el.addEventListener("change", function () {
+        var keyIdx = parseInt(this.dataset.key);
+        var type = this.value;
+        var pin = type === "none" ? 0 : AppState.nextAvailableDigitalPin();
+        AppState.setKeyAssignment(keyIdx, type, pin);
+        renderKeyboard(); // re-render to show/hide pin select
+      });
+    });
+    // Pin selector
+    document.querySelectorAll(".key-assign-pin").forEach(function (el) {
+      el.addEventListener("change", function () {
+        var keyIdx = parseInt(this.dataset.key);
+        var pin = parseInt(this.value);
+        var ka = AppState.get("keyAssignments")[keyIdx];
+        AppState.setKeyAssignment(keyIdx, ka.type, pin);
+      });
+    });
+  }
+
   // --- Computer keyboard input ---------------------------------------------
 
   function _isTextInput(el) {
@@ -118,10 +171,10 @@ var SynthUI = (function () {
     if (e.repeat) return;
     if (_isTextInput(e.target)) return;
 
-    // Space = next voice
     if (e.code === "Space") {
       e.preventDefault();
       var newIdx = SynthEngine.nextVoice();
+      AppState.set("voiceIndex", newIdx);
       var btns = document.querySelectorAll(".voice-btn");
       for (var i = 0; i < btns.length; i++) {
         btns[i].classList.toggle("active", i === newIdx);
@@ -160,30 +213,85 @@ var SynthUI = (function () {
     if (el) el.classList.remove("pressed");
   }
 
-  // --- FX slider binding ---------------------------------------------------
-  // No resonance (filterQ) slider -- removed
-  // Vibrato depth: 0-100 maps to 0-50 cents (extreme pitch wobble)
-  // Vibrato rate: max 13 Hz
-  // Echo delay: min 70ms
-  // Filter: min 50, max 2000
+  // --- FX slider binding with inline analog assignment dropdowns ------------
 
   var SLIDER_MAP = [
-    { id: "fx-filter-freq",  param: "filterFreq",  display: "val-filter-freq",  fmt: function(v){return Math.round(v);} },
-    { id: "fx-echo-mix",     param: "echoMix",      display: "val-echo-mix",     fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
-    { id: "fx-echo-delay",   param: "echoDelay",    display: "val-echo-delay",   fmt: function(v){return Math.round(v);},        scale:0.001 },
-    { id: "fx-echo-decay",   param: "echoDecay",    display: "val-echo-decay",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
-    { id: "fx-reverb-mix",   param: "reverbMix",    display: "val-reverb-mix",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
-    { id: "fx-reverb-room",  param: "reverbRoom",   display: "val-reverb-room",  fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
-    { id: "fx-dist-mix",     param: "distMix",      display: "val-dist-mix",     fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
-    { id: "fx-dist-drive",   param: "distDrive",    display: "val-dist-drive",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
-    { id: "fx-vib-depth",    param: "vibratoDepth",  display: "val-vib-depth",    fmt: function(v){return Math.round(v)+"%";},   scale:0.50 },
-    { id: "fx-vib-rate",     param: "vibratoRate",   display: "val-vib-rate",     fmt: function(v){return parseFloat(v).toFixed(1);} },
-    { id: "fx-attack",       param: "attack",        display: "val-attack",       fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
-    { id: "fx-decay",        param: "decay",         display: "val-decay",        fmt: function(v){return Math.round(v);},       scale:0.001 },
-    { id: "fx-sustain",      param: "sustain",       display: "val-sustain",      fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
-    { id: "fx-release",      param: "release",       display: "val-release",      fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
-    { id: "fx-volume",       param: "volume",        display: "val-volume",       fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-filter-freq",  param: "filterFreq",    display: "val-filter-freq",  fmt: function(v){return Math.round(v);} },
+    { id: "fx-echo-mix",     param: "echoMix",        display: "val-echo-mix",     fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-echo-delay",   param: "echoDelay",      display: "val-echo-delay",   fmt: function(v){return Math.round(v);},        scale:0.001 },
+    { id: "fx-echo-decay",   param: "echoDecay",      display: "val-echo-decay",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-reverb-mix",   param: "reverbMix",      display: "val-reverb-mix",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-reverb-room",  param: "reverbRoom",     display: "val-reverb-room",  fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-dist-mix",     param: "distMix",        display: "val-dist-mix",     fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-dist-drive",   param: "distDrive",      display: "val-dist-drive",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-vib-depth",    param: "vibratoDepth",    display: "val-vib-depth",    fmt: function(v){return Math.round(v)+"%";},   scale:0.50 },
+    { id: "fx-vib-rate",     param: "vibratoRate",     display: "val-vib-rate",     fmt: function(v){return parseFloat(v).toFixed(1);} },
+    { id: "fx-attack",       param: "attack",          display: "val-attack",       fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
+    { id: "fx-decay",        param: "decay",           display: "val-decay",        fmt: function(v){return Math.round(v);},       scale:0.001 },
+    { id: "fx-sustain",      param: "sustain",         display: "val-sustain",      fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-release",      param: "release",         display: "val-release",      fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
+    { id: "fx-volume",       param: "volume",          display: "val-volume",       fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
   ];
+
+  function renderFxAssignDropdowns() {
+    // For each FX slider, insert an assignment dropdown after the slider label
+    for (var i = 0; i < SLIDER_MAP.length; i++) {
+      var s = SLIDER_MAP[i];
+      var container = document.getElementById(s.id + "-assign");
+      if (!container) continue;
+
+      var fa = AppState.get("fxAssignments")[s.param] || { source: "none", pin: null };
+      var sources = AppState.ANALOG_SOURCES;
+
+      var html = '<select class="fx-assign-source" data-param="' + s.param + '">';
+      for (var j = 0; j < sources.length; j++) {
+        var src = sources[j];
+        var sel = src.value === fa.source ? " selected" : "";
+        html += '<option value="' + src.value + '"' + sel + '>' + src.label + '</option>';
+      }
+      html += '</select>';
+
+      if (fa.source === "pot" || fa.source === "ldr") {
+        html += ' <select class="fx-assign-pin" data-param="' + s.param + '">';
+        var adcPins = AppState.ADC_PINS;
+        for (var p = 0; p < adcPins.length; p++) {
+          var psel = adcPins[p] === fa.pin ? " selected" : "";
+          html += '<option value="' + adcPins[p] + '"' + psel + '>GP' + adcPins[p] + '</option>';
+        }
+        html += '</select>';
+      }
+
+      container.innerHTML = html;
+    }
+    _bindFxAssignEvents();
+  }
+
+  function _bindFxAssignEvents() {
+    document.querySelectorAll(".fx-assign-source").forEach(function (el) {
+      el.addEventListener("change", function () {
+        var param = this.dataset.param;
+        var source = this.value;
+        var needsPin = false;
+        for (var i = 0; i < AppState.ANALOG_SOURCES.length; i++) {
+          if (AppState.ANALOG_SOURCES[i].value === source) {
+            needsPin = AppState.ANALOG_SOURCES[i].needsPin;
+            break;
+          }
+        }
+        var pin = needsPin ? AppState.nextAvailableADCPin() : null;
+        AppState.setFxAssignment(param, source, pin);
+        renderFxAssignDropdowns();
+      });
+    });
+    document.querySelectorAll(".fx-assign-pin").forEach(function (el) {
+      el.addEventListener("change", function () {
+        var param = this.dataset.param;
+        var pin = parseInt(this.value);
+        var fa = AppState.get("fxAssignments")[param];
+        AppState.setFxAssignment(param, fa.source, pin);
+      });
+    });
+  }
 
   function bindFXSliders() {
     for (var i = 0; i < SLIDER_MAP.length; i++) {
@@ -241,6 +349,7 @@ var SynthUI = (function () {
     if (!sel) return;
     sel.innerHTML = "";
     var labels = SynthEngine.SCALE_LABELS;
+    var currentScale = AppState.get("scale");
     for (var key in labels) {
       var opt = document.createElement("option");
       opt.value = key;
@@ -254,12 +363,13 @@ var SynthUI = (function () {
     var scaleSel = document.getElementById("play-scale");
     if (scaleSel) {
       scaleSel.addEventListener("change", function () {
-        currentScale = this.value;
+        AppState.set("scale", this.value);
         SynthEngine.allNotesOff();
         renderKeyboard();
         if (SynthEngine.isDroneActive()) {
           SynthEngine.stopDrone();
-          SynthEngine.startDrone(currentScale, currentOctave * 12 + 24);
+          var octave = AppState.get("octave");
+          SynthEngine.startDrone(this.value, octave * 12 + 24);
         }
       });
     }
@@ -268,13 +378,14 @@ var SynthUI = (function () {
     var octVal = document.getElementById("play-octave-val");
     if (octSlider) {
       octSlider.addEventListener("input", function () {
-        currentOctave = parseInt(this.value);
-        if (octVal) octVal.textContent = currentOctave;
+        var octave = parseInt(this.value);
+        AppState.set("octave", octave);
+        if (octVal) octVal.textContent = octave;
         SynthEngine.allNotesOff();
         renderKeyboard();
         if (SynthEngine.isDroneActive()) {
           SynthEngine.stopDrone();
-          SynthEngine.startDrone(currentScale, currentOctave * 12 + 24);
+          SynthEngine.startDrone(AppState.get("scale"), octave * 12 + 24);
         }
       });
     }
@@ -330,14 +441,14 @@ var SynthUI = (function () {
         droneBtn.textContent = "Start Drone";
         droneBtn.classList.remove("active");
       } else {
-        var baseNote = currentOctave * 12 + 24;
-        SynthEngine.startDrone(currentScale, baseNote);
+        var octave = AppState.get("octave");
+        var scale = AppState.get("scale");
+        SynthEngine.startDrone(scale, octave * 12 + 24);
         droneBtn.textContent = "Stop Drone";
         droneBtn.classList.add("active");
       }
     });
 
-    // Drone speed slider
     var speedSlider = document.getElementById("drone-speed");
     var speedVal = document.getElementById("drone-speed-val");
     if (speedSlider) {
@@ -348,7 +459,6 @@ var SynthUI = (function () {
       });
     }
 
-    // Drone mode toggle
     var modeBtn = document.getElementById("btn-drone-mode");
     if (modeBtn) {
       modeBtn.addEventListener("click", function () {
@@ -356,19 +466,71 @@ var SynthUI = (function () {
         var next = current === "random" ? "chords" : "random";
         SynthEngine.setDroneMode(next);
         modeBtn.textContent = next === "chords" ? "Mode: Chords" : "Mode: Random";
-        // Restart drone if active to apply mode change
         if (SynthEngine.isDroneActive()) {
           SynthEngine.stopDrone();
-          var baseNote = currentOctave * 12 + 24;
-          SynthEngine.startDrone(currentScale, baseNote);
+          var octave = AppState.get("octave");
+          var scale = AppState.get("scale");
+          SynthEngine.startDrone(scale, octave * 12 + 24);
           var drBtn = document.getElementById("btn-drone");
-          if (drBtn) {
-            drBtn.textContent = "Stop Drone";
-            drBtn.classList.add("active");
-          }
+          if (drBtn) { drBtn.textContent = "Stop Drone"; drBtn.classList.add("active"); }
         }
       });
     }
+
+    // Drone speed assignment dropdown
+    var droneAssign = document.getElementById("drone-speed-assign");
+    if (droneAssign) {
+      var fa = AppState.get("fxAssignments").droneSpeed || { source: "none", pin: null };
+      var sources = AppState.ANALOG_SOURCES;
+      var html = '<select class="fx-assign-source" data-param="droneSpeed">';
+      for (var j = 0; j < sources.length; j++) {
+        var sel = sources[j].value === fa.source ? " selected" : "";
+        html += '<option value="' + sources[j].value + '"' + sel + '>' + sources[j].label + '</option>';
+      }
+      html += '</select>';
+      if (fa.source === "pot" || fa.source === "ldr") {
+        html += ' <select class="fx-assign-pin" data-param="droneSpeed">';
+        var adcPins = AppState.ADC_PINS;
+        for (var p = 0; p < adcPins.length; p++) {
+          var psel = adcPins[p] === fa.pin ? " selected" : "";
+          html += '<option value="' + adcPins[p] + '"' + psel + '>GP' + adcPins[p] + '</option>';
+        }
+        html += '</select>';
+      }
+      droneAssign.innerHTML = html;
+    }
+  }
+
+  // --- Serial controls -----------------------------------------------------
+
+  function bindSerialControls() {
+    var connectBtn = document.getElementById("btn-serial");
+    var muteBtn = document.getElementById("btn-serial-mute");
+    if (!connectBtn) return;
+
+    connectBtn.addEventListener("click", function () {
+      if (SerialBridge.isConnected()) {
+        SerialBridge.disconnect();
+      } else {
+        SerialBridge.connect();
+      }
+    });
+
+    if (muteBtn) {
+      muteBtn.addEventListener("click", function () {
+        var muted = !AppState.get("serialMuted");
+        AppState.set("serialMuted", muted);
+        muteBtn.textContent = muted ? "Unmute Pico" : "Mute Pico";
+        muteBtn.classList.toggle("active", muted);
+      });
+    }
+
+    // Update button state on serial change
+    AppState.on("change:serialConnected", function (connected) {
+      connectBtn.textContent = connected ? "Disconnect Pico" : "Connect Pico";
+      connectBtn.classList.toggle("active", connected);
+      if (muteBtn) muteBtn.style.display = connected ? "" : "none";
+    });
   }
 
   // --- Init ----------------------------------------------------------------
@@ -378,21 +540,43 @@ var SynthUI = (function () {
     renderScaleOptions();
     renderKeyboard();
     bindFXSliders();
+    renderFxAssignDropdowns();
     bindScaleOctave();
     bindLoopControls();
     bindDroneControls();
+    bindSerialControls();
 
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
+
+    // Listen for serial param updates to sync sliders visually
+    AppState.on("serial:param", function (data) {
+      // Find slider for this param and update
+      for (var i = 0; i < SLIDER_MAP.length; i++) {
+        var s = SLIDER_MAP[i];
+        if (s.param === data.param) {
+          var el = document.getElementById(s.id);
+          if (el) {
+            // Convert param value back to slider raw value
+            var raw = s.scale ? data.value / s.scale : data.value;
+            // Some params need special handling
+            if (s.param === "filterFreq") raw = data.value;
+            el.value = raw;
+            var disp = document.getElementById(s.display);
+            if (disp) disp.textContent = s.fmt(raw);
+          }
+          break;
+        }
+      }
+    });
   }
 
   return {
     init: init,
     renderVoiceButtons: renderVoiceButtons,
     renderKeyboard: renderKeyboard,
+    renderFxAssignDropdowns: renderFxAssignDropdowns,
     syncSlidersFromEngine: syncSlidersFromEngine,
     selectVoice: selectVoice,
-    getCurrentScale: function() { return currentScale; },
-    getCurrentOctave: function() { return currentOctave; },
   };
 })();

@@ -11,15 +11,20 @@
   <header class="site-header">
     <h1>Pico 2 Synth Workshop</h1>
     <p class="subtitle">Build, play, and configure your synthesizer</p>
+    <div class="serial-controls">
+      <button class="btn-serial" id="btn-serial">Connect Pico</button>
+      <button class="btn-serial btn-mute" id="btn-serial-mute" style="display:none">Mute Pico</button>
+      <span class="serial-status" id="serial-status"></span>
+    </div>
   </header>
 
   <nav class="tab-bar" role="tablist">
     <button class="tab active" data-tab="play" role="tab" aria-selected="true">Play Synth</button>
-    <button class="tab" data-tab="config" role="tab" aria-selected="false">Config Generator</button>
+    <button class="tab" data-tab="config" role="tab" aria-selected="false">Wiring &amp; Code</button>
   </nav>
 
   <!-- ================================================================ -->
-  <!-- TAB 1: PLAYABLE SYNTH                                           -->
+  <!-- TAB 1: PLAY SYNTH + ASSIGN INPUTS                               -->
   <!-- ================================================================ -->
   <main id="tab-play" class="tab-panel active">
 
@@ -29,9 +34,9 @@
       <div class="voice-buttons" id="voice-buttons"></div>
     </section>
 
-    <!-- Keyboard -->
+    <!-- Keyboard with pin assignments -->
     <section class="card keyboard-section">
-      <h2>Keyboard <span class="hint">(keys A&ndash;L)</span></h2>
+      <h2>Keyboard <span class="hint">(keys A&ndash;L &bull; assign physical inputs below each key)</span></h2>
       <div class="keyboard" id="keyboard"></div>
       <div class="keyboard-settings">
         <label>Scale
@@ -48,73 +53,88 @@
         </div>
         <label class="drone-speed-label">Drone Speed <span id="drone-speed-val">50%</span>
           <input type="range" id="drone-speed" min="0" max="100" value="50">
+          <span class="fx-assign-inline" id="drone-speed-assign"></span>
         </label>
       </div>
     </section>
 
-    <!-- FX Controls -->
+    <!-- FX Controls with assignment dropdowns -->
     <section class="card fx-section">
-      <h2>Effects</h2>
+      <h2>Effects <span class="hint">(assign physical inputs to control each parameter)</span></h2>
       <div class="fx-grid">
         <div class="fx-group">
           <h3>Filter</h3>
           <label>Cutoff <span id="val-filter-freq">2000</span> Hz
             <input type="range" id="fx-filter-freq" min="50" max="2000" value="2000" step="5">
           </label>
+          <div class="fx-assign-inline" id="fx-filter-freq-assign"></div>
         </div>
         <div class="fx-group">
           <h3>Echo</h3>
           <label>Mix <span id="val-echo-mix">0%</span>
             <input type="range" id="fx-echo-mix" min="0" max="100" value="0">
           </label>
+          <div class="fx-assign-inline" id="fx-echo-mix-assign"></div>
           <label>Delay <span id="val-echo-delay">250</span> ms
             <input type="range" id="fx-echo-delay" min="70" max="800" value="250" step="5">
           </label>
+          <div class="fx-assign-inline" id="fx-echo-delay-assign"></div>
           <label>Decay <span id="val-echo-decay">35%</span>
             <input type="range" id="fx-echo-decay" min="0" max="100" value="35">
           </label>
+          <div class="fx-assign-inline" id="fx-echo-decay-assign"></div>
         </div>
         <div class="fx-group">
           <h3>Reverb</h3>
           <label>Mix <span id="val-reverb-mix">0%</span>
             <input type="range" id="fx-reverb-mix" min="0" max="100" value="0">
           </label>
+          <div class="fx-assign-inline" id="fx-reverb-mix-assign"></div>
           <label>Room <span id="val-reverb-room">50%</span>
             <input type="range" id="fx-reverb-room" min="0" max="100" value="50">
           </label>
+          <div class="fx-assign-inline" id="fx-reverb-room-assign"></div>
         </div>
         <div class="fx-group">
           <h3>Distortion</h3>
           <label>Mix <span id="val-dist-mix">0%</span>
             <input type="range" id="fx-dist-mix" min="0" max="100" value="0">
           </label>
+          <div class="fx-assign-inline" id="fx-dist-mix-assign"></div>
           <label>Drive <span id="val-dist-drive">0%</span>
             <input type="range" id="fx-dist-drive" min="0" max="100" value="0">
           </label>
+          <div class="fx-assign-inline" id="fx-dist-drive-assign"></div>
         </div>
         <div class="fx-group">
           <h3>Vibrato</h3>
           <label>Depth <span id="val-vib-depth">0%</span>
             <input type="range" id="fx-vib-depth" min="0" max="100" value="0">
           </label>
+          <div class="fx-assign-inline" id="fx-vib-depth-assign"></div>
           <label>Rate <span id="val-vib-rate">5.0</span> Hz
             <input type="range" id="fx-vib-rate" min="0" max="13" value="5" step="0.1">
           </label>
+          <div class="fx-assign-inline" id="fx-vib-rate-assign"></div>
         </div>
         <div class="fx-group">
           <h3>Envelope</h3>
           <label>Attack <span id="val-attack">0.01</span>s
             <input type="range" id="fx-attack" min="0" max="1500" value="10">
           </label>
+          <div class="fx-assign-inline" id="fx-attack-assign"></div>
           <label>Decay <span id="val-decay">200</span>ms
             <input type="range" id="fx-decay" min="10" max="2000" value="200">
           </label>
+          <div class="fx-assign-inline" id="fx-decay-assign"></div>
           <label>Sustain <span id="val-sustain">70%</span>
             <input type="range" id="fx-sustain" min="0" max="100" value="70">
           </label>
+          <div class="fx-assign-inline" id="fx-sustain-assign"></div>
           <label>Release <span id="val-release">0.20</span>s
             <input type="range" id="fx-release" min="10" max="3000" value="200">
           </label>
+          <div class="fx-assign-inline" id="fx-release-assign"></div>
         </div>
       </div>
     </section>
@@ -123,34 +143,85 @@
       <label>Master Volume <span id="val-volume">80%</span>
         <input type="range" id="fx-volume" min="0" max="100" value="80">
       </label>
+      <div class="fx-assign-inline" id="fx-volume-assign"></div>
     </section>
 
   </main>
 
   <!-- ================================================================ -->
-  <!-- TAB 2: CONFIG GENERATOR                                         -->
+  <!-- TAB 2: WIRING GUIDE + CONFIG + CODE                             -->
   <!-- ================================================================ -->
   <main id="tab-config" class="tab-panel">
+
+    <!-- Setup / firmware download -->
+    <section class="card" id="setup-section">
+      <h2>Getting Started</h2>
+      <div class="setup-steps">
+        <div class="setup-step">
+          <h3>1. Install CircuitPython</h3>
+          <p>Hold <strong>BOOTSEL</strong> on your Pico 2 while plugging in USB. It appears as a drive.
+             Drag the <code>.uf2</code> file onto it. The board reboots automatically.</p>
+          <a class="btn btn-download" href="https://circuitpython.org/board/raspberry_pi_pico2/" target="_blank" rel="noopener">Download CircuitPython UF2</a>
+        </div>
+        <div class="setup-step">
+          <h3>2. Copy Libraries</h3>
+          <p>Copy the <code>lib/</code> folder from this project onto the <code>CIRCUITPY</code> drive.
+             This includes the synth engine, patches, inputs, FX, and LED modules.</p>
+        </div>
+        <div class="setup-step">
+          <h3>3. Configure &amp; Download code.py</h3>
+          <p>Use the Play Synth tab to pick your sounds and assign physical inputs.
+             Then download your <code>code.py</code> below and copy it to the <code>CIRCUITPY</code> drive.</p>
+        </div>
+        <div class="setup-step">
+          <h3>4. Test with Web Serial</h3>
+          <p>Flash the <a href="#" id="link-serial-test">serial test script</a> to test your wiring.
+             Click <strong>Connect Pico</strong> in the header to play sounds through your browser
+             using your physical buttons and sensors.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- System pins -->
+    <section class="card" id="system-pins-section">
+      <h2>System Pins</h2>
+      <div class="system-pins-grid">
+        <div class="input-group"><label>Audio output</label><input type="number" id="cfg-audio-pin" min="0" max="22" value="15"></div>
+        <div class="input-group"><label>Voice cycle button</label><input type="number" id="cfg-voice-btn" min="0" max="22" value="8"></div>
+        <div class="input-group">
+          <label>LED type</label>
+          <select id="cfg-led-mode">
+            <option value="neopixel" selected>NeoPixel (WS2812B)</option>
+            <option value="rgb">RGB LED (3 pins)</option>
+          </select>
+        </div>
+        <div class="input-group" id="cfg-led-pin-group"><label>LED pin</label><input type="number" id="cfg-led-pin" min="0" max="22" value="16"></div>
+        <div class="input-group" id="cfg-i2c-sda-group"><label>I2C SDA</label><input type="number" id="cfg-i2c-sda" min="0" max="28" value="4"></div>
+        <div class="input-group" id="cfg-i2c-scl-group"><label>I2C SCL</label><input type="number" id="cfg-i2c-scl" min="0" max="28" value="5"></div>
+      </div>
+    </section>
 
     <!-- Pinout diagram -->
     <section class="card" id="pinout-section">
       <h2>Pico 2 Pinout</h2>
-      <p class="hint" style="margin-bottom:0.75rem">Highlighted pins show your current configuration.</p>
+      <p class="hint" style="margin-bottom:0.75rem">Pins are highlighted based on your assignments from the Play tab.</p>
       <div id="pinout-svg-container"></div>
     </section>
 
-    <section class="card" id="config-options">
-      <h2>Build Your Config</h2>
-      <div id="config-options-body"></div>
+    <!-- Wiring Guide -->
+    <section class="card" id="wiring-guide-section">
+      <h2>Wiring Guide</h2>
+      <div id="wiring-guide-body"></div>
     </section>
 
+    <!-- Code output -->
     <section class="card" id="code-step">
       <div class="code-output">
         <div class="code-header">
           <span class="filename">code.py</span>
           <div class="code-actions">
             <button class="btn btn-copy" id="btn-copy" type="button">Copy to Clipboard</button>
-            <button class="btn btn-download" id="btn-download" type="button">Download</button>
+            <button class="btn btn-download" id="btn-download" type="button">Download code.py</button>
           </div>
         </div>
         <div class="code-body">
@@ -164,6 +235,8 @@
   <div id="toast" class="toast"></div>
 
   <script src="synth-engine.js"></script>
+  <script src="app-state.js"></script>
+  <script src="serial-bridge.js"></script>
   <script src="synth-ui.js"></script>
   <script src="config-generator.js"></script>
   <script src="app.js"></script>
