@@ -20,7 +20,6 @@ var ConfigGenerator = (function () {
     { value: "echo_decay",      label: "Echo decay" },
     { value: "reverb_mix",      label: "Reverb mix" },
     { value: "reverb_room",     label: "Reverb room" },
-    { value: "reverb_damp",     label: "Reverb damp" },
     { value: "distortion_mix",  label: "Distortion mix" },
     { value: "distortion_drive",label: "Distortion drive" },
     { value: "vibrato_depth",   label: "Vibrato depth" },

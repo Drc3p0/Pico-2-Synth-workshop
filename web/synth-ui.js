@@ -44,6 +44,7 @@ var SynthUI = (function () {
       btns[i].classList.toggle("active", i === newIdx);
     }
     syncSlidersFromEngine();
+    renderKeyboard(); // re-render for drum labels
   }
 
   // --- Keyboard rendering --------------------------------------------------
@@ -57,13 +58,15 @@ var SynthUI = (function () {
     updateNotes();
     var container = document.getElementById("keyboard");
     if (!container) return;
+    var isDrum = SynthEngine.isDrumKit();
+    var drumLabels = isDrum ? SynthEngine.getDrumKeyLabels(NUM_KEYS) : null;
     var html = "";
     for (var i = 0; i < NUM_KEYS; i++) {
       var midi = currentNotes[i];
-      var noteName = SynthEngine.midiToNoteName(midi);
+      var topLabel = isDrum ? drumLabels[i] : SynthEngine.midiToNoteName(midi);
       var keyLabel = KEY_MAP[i] ? KEY_MAP[i].toUpperCase() : "";
       html += '<button class="key" data-index="' + i + '" data-midi="' + midi + '">'
-            + '<span class="key-note">' + noteName + '</span>'
+            + '<span class="key-note">' + topLabel + '</span>'
             + '<span class="key-bind">' + keyLabel + '</span>'
             + '</button>';
     }
@@ -78,7 +81,8 @@ var SynthUI = (function () {
         el.addEventListener("pointerdown", function (e) {
           e.preventDefault();
           var midi = parseInt(el.getAttribute("data-midi"));
-          SynthEngine.noteOn(midi);
+          var idx = parseInt(el.getAttribute("data-index"));
+          SynthEngine.noteOn(midi, idx);
           el.classList.add("pressed");
         });
         el.addEventListener("pointerup", function (e) {
@@ -97,7 +101,6 @@ var SynthUI = (function () {
   }
 
   // --- Computer keyboard input ---------------------------------------------
-  // FIX: Only block keyboard events for text-entry inputs, NOT sliders
 
   function _isTextInput(el) {
     var tag = el.tagName;
@@ -105,9 +108,8 @@ var SynthUI = (function () {
     if (tag === "SELECT") return true;
     if (tag === "INPUT") {
       var type = (el.type || "").toLowerCase();
-      // Allow keyboard events while interacting with range sliders
       if (type === "range") return false;
-      return true; // block for text, number, etc.
+      return true;
     }
     return false;
   }
@@ -125,6 +127,7 @@ var SynthUI = (function () {
         btns[i].classList.toggle("active", i === newIdx);
       }
       syncSlidersFromEngine();
+      renderKeyboard();
       return;
     }
 
@@ -136,7 +139,7 @@ var SynthUI = (function () {
     e.preventDefault();
     keyHeld[key] = true;
     var midi = currentNotes[idx];
-    SynthEngine.noteOn(midi);
+    SynthEngine.noteOn(midi, idx);
 
     var el = document.querySelector('.key[data-index="' + idx + '"]');
     if (el) el.classList.add("pressed");
@@ -158,10 +161,14 @@ var SynthUI = (function () {
   }
 
   // --- FX slider binding ---------------------------------------------------
+  // No resonance (filterQ) slider -- removed
+  // Vibrato depth: 0-100 maps to 0-50 cents (extreme pitch wobble)
+  // Vibrato rate: max 13 Hz
+  // Echo delay: min 70ms
+  // Filter: min 50, max 2000
 
   var SLIDER_MAP = [
     { id: "fx-filter-freq",  param: "filterFreq",  display: "val-filter-freq",  fmt: function(v){return Math.round(v);} },
-    { id: "fx-filter-q",     param: "filterQ",      display: "val-filter-q",     fmt: function(v){return parseFloat(v).toFixed(1);} },
     { id: "fx-echo-mix",     param: "echoMix",      display: "val-echo-mix",     fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
     { id: "fx-echo-delay",   param: "echoDelay",    display: "val-echo-delay",   fmt: function(v){return Math.round(v);},        scale:0.001 },
     { id: "fx-echo-decay",   param: "echoDecay",    display: "val-echo-decay",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
@@ -169,7 +176,7 @@ var SynthUI = (function () {
     { id: "fx-reverb-room",  param: "reverbRoom",   display: "val-reverb-room",  fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
     { id: "fx-dist-mix",     param: "distMix",      display: "val-dist-mix",     fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
     { id: "fx-dist-drive",   param: "distDrive",    display: "val-dist-drive",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
-    { id: "fx-vib-depth",    param: "vibratoDepth",  display: "val-vib-depth",    fmt: function(v){return Math.round(v)+"%";},   scale:0.15 },
+    { id: "fx-vib-depth",    param: "vibratoDepth",  display: "val-vib-depth",    fmt: function(v){return Math.round(v)+"%";},   scale:0.50 },
     { id: "fx-vib-rate",     param: "vibratoRate",   display: "val-vib-rate",     fmt: function(v){return parseFloat(v).toFixed(1);} },
     { id: "fx-attack",       param: "attack",        display: "val-attack",       fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
     { id: "fx-decay",        param: "decay",         display: "val-decay",        fmt: function(v){return Math.round(v);},       scale:0.001 },
@@ -198,7 +205,6 @@ var SynthUI = (function () {
     var fs = SynthEngine.fxState;
     var sliderVals = {
       "fx-filter-freq": fs.filterFreq,
-      "fx-filter-q": fs.filterQ,
       "fx-echo-mix": fs.echoMix * 100,
       "fx-echo-delay": fs.echoDelay * 1000,
       "fx-echo-decay": fs.echoDecay * 100,
@@ -206,7 +212,7 @@ var SynthUI = (function () {
       "fx-reverb-room": (fs.reverbRoom || 0.5) * 100,
       "fx-dist-mix": fs.distMix * 100,
       "fx-dist-drive": fs.distDrive * 100,
-      "fx-vib-depth": fs.vibratoDepth / 0.15 * 100,
+      "fx-vib-depth": fs.vibratoDepth / 0.50 * 100,
       "fx-vib-rate": fs.vibratoRate,
       "fx-attack": fs.attack * 1000,
       "fx-decay": fs.decay * 1000,
@@ -251,7 +257,6 @@ var SynthUI = (function () {
         currentScale = this.value;
         SynthEngine.allNotesOff();
         renderKeyboard();
-        // Update drone if active
         if (SynthEngine.isDroneActive()) {
           SynthEngine.stopDrone();
           SynthEngine.startDrone(currentScale, currentOctave * 12 + 24);
@@ -283,22 +288,18 @@ var SynthUI = (function () {
 
     loopBtn.addEventListener("click", function () {
       if (SynthEngine.isLoopRecording()) {
-        // Stop recording, start playback
         SynthEngine.stopLoopRecording();
         SynthEngine.startLoopPlayback();
         loopBtn.textContent = "Stop Loop";
         loopBtn.classList.add("active");
       } else if (SynthEngine.isLoopPlaying()) {
-        // Stop playback
         SynthEngine.stopLoopPlayback();
         loopBtn.textContent = "Record Loop";
         loopBtn.classList.remove("active");
       } else {
-        // Start recording
         SynthEngine.startLoopRecording();
         loopBtn.textContent = "Recording...";
         loopBtn.classList.add("recording");
-        // Auto-stop after timeout for safety
         setTimeout(function() {
           if (SynthEngine.isLoopRecording()) {
             SynthEngine.stopLoopRecording();
@@ -312,7 +313,7 @@ var SynthUI = (function () {
               loopBtn.classList.remove("recording");
             }
           }
-        }, 30000); // 30 second max
+        }, 30000);
       }
     });
   }
@@ -335,6 +336,39 @@ var SynthUI = (function () {
         droneBtn.classList.add("active");
       }
     });
+
+    // Drone speed slider
+    var speedSlider = document.getElementById("drone-speed");
+    var speedVal = document.getElementById("drone-speed-val");
+    if (speedSlider) {
+      speedSlider.addEventListener("input", function () {
+        var v = parseFloat(this.value) / 100;
+        SynthEngine.setDroneSpeed(v);
+        if (speedVal) speedVal.textContent = Math.round(v * 100) + "%";
+      });
+    }
+
+    // Drone mode toggle
+    var modeBtn = document.getElementById("btn-drone-mode");
+    if (modeBtn) {
+      modeBtn.addEventListener("click", function () {
+        var current = SynthEngine.getDroneMode();
+        var next = current === "random" ? "chords" : "random";
+        SynthEngine.setDroneMode(next);
+        modeBtn.textContent = next === "chords" ? "Mode: Chords" : "Mode: Random";
+        // Restart drone if active to apply mode change
+        if (SynthEngine.isDroneActive()) {
+          SynthEngine.stopDrone();
+          var baseNote = currentOctave * 12 + 24;
+          SynthEngine.startDrone(currentScale, baseNote);
+          var drBtn = document.getElementById("btn-drone");
+          if (drBtn) {
+            drBtn.textContent = "Stop Drone";
+            drBtn.classList.add("active");
+          }
+        }
+      });
+    }
   }
 
   // --- Init ----------------------------------------------------------------

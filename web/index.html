@@ -44,7 +44,11 @@
         <div class="transport-buttons">
           <button class="btn-transport" id="btn-loop">Record Loop</button>
           <button class="btn-transport" id="btn-drone">Start Drone</button>
+          <button class="btn-transport" id="btn-drone-mode">Mode: Random</button>
         </div>
+        <label class="drone-speed-label">Drone Speed <span id="drone-speed-val">50%</span>
+          <input type="range" id="drone-speed" min="0" max="100" value="50">
+        </label>
       </div>
     </section>
 
@@ -55,10 +59,7 @@
         <div class="fx-group">
           <h3>Filter</h3>
           <label>Cutoff <span id="val-filter-freq">2000</span> Hz
-            <input type="range" id="fx-filter-freq" min="100" max="8000" value="2000" step="10">
-          </label>
-          <label>Resonance <span id="val-filter-q">1.0</span>
-            <input type="range" id="fx-filter-q" min="0.5" max="6.0" value="1.0" step="0.1">
+            <input type="range" id="fx-filter-freq" min="50" max="2000" value="2000" step="5">
           </label>
         </div>
         <div class="fx-group">
@@ -67,7 +68,7 @@
             <input type="range" id="fx-echo-mix" min="0" max="100" value="0">
           </label>
           <label>Delay <span id="val-echo-delay">250</span> ms
-            <input type="range" id="fx-echo-delay" min="30" max="800" value="250" step="5">
+            <input type="range" id="fx-echo-delay" min="70" max="800" value="250" step="5">
           </label>
           <label>Decay <span id="val-echo-decay">35%</span>
             <input type="range" id="fx-echo-decay" min="0" max="100" value="35">
@@ -97,7 +98,7 @@
             <input type="range" id="fx-vib-depth" min="0" max="100" value="0">
           </label>
           <label>Rate <span id="val-vib-rate">5.0</span> Hz
-            <input type="range" id="fx-vib-rate" min="0" max="20" value="5" step="0.1">
+            <input type="range" id="fx-vib-rate" min="0" max="13" value="5" step="0.1">
           </label>
         </div>
         <div class="fx-group">

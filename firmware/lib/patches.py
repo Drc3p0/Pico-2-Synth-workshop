@@ -30,8 +30,9 @@ def _to_wave(values):
 # Waveform generation
 # ---------------------------------------------------------------------------
 # Each function returns a 256-sample int16 wavetable suitable for synthio.
-# Voices are grouped: Core synth, Synth leads/basses, Drums/percussion,
-# Noise/experimental, Drone/ambient — matching the web engine exactly.
+# Voices are grouped: Core synth, Synth leads/basses, Drums (single voice,
+# per-key sounds), Noise/experimental, Drone/ambient -- matching the web
+# engine exactly.
 # ---------------------------------------------------------------------------
 
 # === Core synth ============================================================
@@ -89,20 +90,6 @@ def _gen_synth_lead():
     return _to_wave(vals)
 
 
-def _gen_acid():
-    """Saw-like with emphasized resonant mid-harmonics -- TB-303 character."""
-    vals = []
-    for i in range(WAVE_SIZE):
-        phase = (2.0 * math.pi * i) / WAVE_SIZE
-        sample = 0.0
-        for k in range(1, 25):
-            saw = (1.0 / k) * (1 if k % 2 else -1) * -1
-            boost = 1.5 if 3 <= k <= 6 else 1.0
-            sample += math.sin(phase * k) * saw * boost
-        vals.append(sample * WAVE_AMP * 0.35)
-    return _to_wave(vals)
-
-
 def _gen_super_saw():
     """Multiple detuned saw layers -- thick and wide."""
     vals = []
@@ -130,7 +117,7 @@ def _gen_reese_bass():
     return _to_wave(vals)
 
 
-# === Drums / percussion ====================================================
+# === Drums (individual waveforms for per-key drum kit) =====================
 
 def _gen_kick():
     """Heavy fundamental with fast decay harmonics."""
@@ -177,8 +164,37 @@ def _gen_hihat():
     return _to_wave(vals)
 
 
-def _gen_metal_perc():
-    """Bell/metallic inharmonic spectrum."""
+def _gen_clap():
+    """Clap -- mid-frequency noise burst."""
+    vals = []
+    for i in range(WAVE_SIZE):
+        phase = (2.0 * math.pi * i) / WAVE_SIZE
+        sample = 0.0
+        for k in range(1, 21):
+            if k < 3:
+                amp = 0.2
+            else:
+                amp = (0.5 / k) * (1 + math.sin(k * 2.3) * 0.6)
+            sample += math.sin(phase * k) * amp
+        vals.append(sample * WAVE_AMP * 0.35)
+    return _to_wave(vals)
+
+
+def _gen_tom():
+    """Tom -- strong fundamental with a few harmonics."""
+    partials = [(1, 1.0), (2, 0.55), (3, 0.2), (4, 0.05)]
+    vals = []
+    for i in range(WAVE_SIZE):
+        phase = (2.0 * math.pi * i) / WAVE_SIZE
+        sample = 0.0
+        for harmonic, amp in partials:
+            sample += math.sin(phase * harmonic) * amp
+        vals.append(sample * WAVE_AMP * 0.55)
+    return _to_wave(vals)
+
+
+def _gen_rim():
+    """Rimshot -- metallic, bell-like."""
     vals = []
     for i in range(WAVE_SIZE):
         phase = (2.0 * math.pi * i) / WAVE_SIZE
@@ -189,6 +205,35 @@ def _gen_metal_perc():
                 amp *= 1.8
             sample += math.sin(phase * k) * amp
         vals.append(sample * WAVE_AMP * 0.25)
+    return _to_wave(vals)
+
+
+def _gen_cowbell():
+    """Cowbell -- two dominant non-octave partials."""
+    partials = [(1, 0.3), (2, 0.1), (3, 0.8), (4, 0.05), (5, 0.6), (6, 0.02)]
+    vals = []
+    for i in range(WAVE_SIZE):
+        phase = (2.0 * math.pi * i) / WAVE_SIZE
+        sample = 0.0
+        for harmonic, amp in partials:
+            sample += math.sin(phase * harmonic) * amp
+        vals.append(sample * WAVE_AMP * 0.35)
+    return _to_wave(vals)
+
+
+def _gen_shaker():
+    """Shaker -- mostly high-frequency content."""
+    vals = []
+    for i in range(WAVE_SIZE):
+        phase = (2.0 * math.pi * i) / WAVE_SIZE
+        sample = 0.0
+        for k in range(1, 33):
+            if k < 6:
+                amp = 0.02
+            else:
+                amp = 0.25 / math.sqrt(k)
+            sample += math.sin(phase * k) * amp
+        vals.append(sample * WAVE_AMP * 0.40)
     return _to_wave(vals)
 
 
@@ -266,10 +311,16 @@ def _gen_pad():
 
 
 def _gen_drone():
-    """Perfect 5ths and octaves -- rich, organ-like drone."""
+    """Rich organ-like drone with strong bass undertone.
+
+    Heavy on low harmonics (1st, 2nd, 3rd) plus 5th and octave partials
+    for a warm, rumbling foundation distinct from Pad (gentle) and
+    Outer Space (detuned/eerie).
+    """
     partials = [
-        (1, 1.0), (2, 0.5), (3, 0.7), (4, 0.25),
-        (5, 0.15), (6, 0.6), (7, 0.1), (8, 0.3),
+        (1, 1.0), (2, 0.85), (3, 0.7), (4, 0.4),
+        (5, 0.15), (6, 0.55), (7, 0.08), (8, 0.25),
+        (9, 0.04), (10, 0.12),
     ]
     vals = []
     for i in range(WAVE_SIZE):
@@ -277,7 +328,7 @@ def _gen_drone():
         sample = 0.0
         for harmonic, amp in partials:
             sample += math.sin(phase * harmonic) * amp
-        vals.append(sample * WAVE_AMP * 0.30)
+        vals.append(sample * WAVE_AMP * 0.28)
     return _to_wave(vals)
 
 
@@ -289,13 +340,16 @@ wave_sine = _gen_sine()
 wave_square = _gen_square()
 wave_piano = _gen_piano()
 wave_synth_lead = _gen_synth_lead()
-wave_acid = _gen_acid()
 wave_super_saw = _gen_super_saw()
 wave_reese_bass = _gen_reese_bass()
 wave_kick = _gen_kick()
 wave_snare = _gen_snare()
 wave_hihat = _gen_hihat()
-wave_metal_perc = _gen_metal_perc()
+wave_clap = _gen_clap()
+wave_tom = _gen_tom()
+wave_rim = _gen_rim()
+wave_cowbell = _gen_cowbell()
+wave_shaker = _gen_shaker()
 wave_bitcrush = _gen_bitcrush()
 wave_noise_wash = _gen_noise_wash()
 wave_vox = _gen_vox()
@@ -309,13 +363,16 @@ WAVEFORMS = {
     "square": wave_square,
     "piano": wave_piano,
     "synth_lead": wave_synth_lead,
-    "acid": wave_acid,
     "super_saw": wave_super_saw,
     "reese_bass": wave_reese_bass,
     "kick": wave_kick,
     "snare": wave_snare,
     "hihat": wave_hihat,
-    "metal_perc": wave_metal_perc,
+    "clap": wave_clap,
+    "tom": wave_tom,
+    "rim": wave_rim,
+    "cowbell": wave_cowbell,
+    "shaker": wave_shaker,
     "bitcrush": wave_bitcrush,
     "noise_wash": wave_noise_wash,
     "vox": wave_vox,
@@ -326,11 +383,35 @@ WAVEFORMS = {
 
 
 # ---------------------------------------------------------------------------
+# Drum kit -- per-key sound definitions for the "Drums" voice
+# ---------------------------------------------------------------------------
+# When the Drums voice is active, each note-input index maps to a different
+# drum sound.  The synth engine uses this list to select waveform + envelope
+# per key press.
+
+DRUM_KIT = [
+    {"name": "Kick",    "waveform": "kick",    "attack_time": 0.0, "decay_time": 0.12, "release_time": 0.08, "sustain_level": 0.0, "filter_freq": 400.0,  "midi_note": 36},
+    {"name": "Snare",   "waveform": "snare",   "attack_time": 0.0, "decay_time": 0.08, "release_time": 0.06, "sustain_level": 0.0, "filter_freq": 2000.0, "midi_note": 38},
+    {"name": "Hi-Hat",  "waveform": "hihat",   "attack_time": 0.0, "decay_time": 0.04, "release_time": 0.03, "sustain_level": 0.0, "filter_freq": 2000.0, "midi_note": 42},
+    {"name": "Clap",    "waveform": "clap",    "attack_time": 0.0, "decay_time": 0.10, "release_time": 0.08, "sustain_level": 0.0, "filter_freq": 2000.0, "midi_note": 39},
+    {"name": "Tom",     "waveform": "tom",     "attack_time": 0.0, "decay_time": 0.15, "release_time": 0.10, "sustain_level": 0.0, "filter_freq": 800.0,  "midi_note": 45},
+    {"name": "Rim",     "waveform": "rim",     "attack_time": 0.0, "decay_time": 0.05, "release_time": 0.04, "sustain_level": 0.0, "filter_freq": 2000.0, "midi_note": 37},
+    {"name": "Cowbell", "waveform": "cowbell",  "attack_time": 0.0, "decay_time": 0.20, "release_time": 0.15, "sustain_level": 0.0, "filter_freq": 2000.0, "midi_note": 56},
+    {"name": "Shaker",  "waveform": "shaker",  "attack_time": 0.0, "decay_time": 0.06, "release_time": 0.04, "sustain_level": 0.0, "filter_freq": 2000.0, "midi_note": 70},
+]
+
+NUM_DRUM_SOUNDS = len(DRUM_KIT)
+
+
+# ---------------------------------------------------------------------------
 # Voice presets
 # ---------------------------------------------------------------------------
 # Each voice is a complete sound definition: waveform + envelope + FX + modulation.
 # The VOICES list defines the cycle order for the voice-select button.
 # Order and parameters match the web synth engine exactly.
+#
+# The "Drums" voice sets is_drum_kit=True; the engine uses DRUM_KIT above
+# for per-key waveform/envelope selection.
 # ---------------------------------------------------------------------------
 
 VOICES = [
@@ -342,8 +423,7 @@ VOICES = [
         "decay_time": 0.3,
         "release_time": 0.4,
         "sustain_level": 0.8,
-        "filter_freq": 3000.0,
-        "filter_q": 0.7,
+        "filter_freq": 2000.0,
         "vibrato_rate": 0.0,
         "vibrato_depth": 0.0,
         "detune": 0.0,
@@ -362,8 +442,7 @@ VOICES = [
         "decay_time": 0.1,
         "release_time": 0.15,
         "sustain_level": 0.65,
-        "filter_freq": 2800.0,
-        "filter_q": 1.2,
+        "filter_freq": 2000.0,
         "vibrato_rate": 0.0,
         "vibrato_depth": 0.0,
         "detune": 0.0,
@@ -382,8 +461,7 @@ VOICES = [
         "decay_time": 0.4,
         "release_time": 0.3,
         "sustain_level": 0.0,
-        "filter_freq": 4000.0,
-        "filter_q": 0.7,
+        "filter_freq": 2000.0,
         "vibrato_rate": 0.0,
         "vibrato_depth": 0.0,
         "detune": 0.0,
@@ -404,8 +482,7 @@ VOICES = [
         "decay_time": 0.12,
         "release_time": 0.18,
         "sustain_level": 0.55,
-        "filter_freq": 3200.0,
-        "filter_q": 1.1,
+        "filter_freq": 2000.0,
         "vibrato_rate": 5.8,
         "vibrato_depth": 0.06,
         "detune": 0.006,
@@ -418,34 +495,13 @@ VOICES = [
         "distortion_drive": 0.62,
     },
     {
-        "name": "Acid",
-        "waveform": "acid",
-        "attack_time": 0.0,
-        "decay_time": 0.15,
-        "release_time": 0.08,
-        "sustain_level": 0.3,
-        "filter_freq": 1200.0,
-        "filter_q": 3.5,
-        "vibrato_rate": 0.0,
-        "vibrato_depth": 0.0,
-        "detune": 0.0,
-        "echo_mix": 0.2,
-        "echo_delay_ms": 120.0,
-        "echo_decay": 0.4,
-        "reverb_mix": 0.0,
-        "reverb_roomsize": 0.3,
-        "distortion_mix": 0.3,
-        "distortion_drive": 0.4,
-    },
-    {
         "name": "Super Saw",
         "waveform": "super_saw",
         "attack_time": 0.01,
         "decay_time": 0.2,
         "release_time": 0.25,
         "sustain_level": 0.75,
-        "filter_freq": 3500.0,
-        "filter_q": 0.8,
+        "filter_freq": 2000.0,
         "vibrato_rate": 0.3,
         "vibrato_depth": 0.03,
         "detune": 0.012,
@@ -465,7 +521,6 @@ VOICES = [
         "release_time": 0.1,
         "sustain_level": 0.7,
         "filter_freq": 600.0,
-        "filter_q": 1.5,
         "vibrato_rate": 0.2,
         "vibrato_depth": 0.04,
         "detune": 0.008,
@@ -478,84 +533,24 @@ VOICES = [
         "distortion_drive": 0.3,
     },
 
-    # === Drums / percussion ===
+    # === Drums (single voice, per-key sounds via DRUM_KIT) ===
     {
-        "name": "Kick",
+        "name": "Drums",
         "waveform": "kick",
+        "is_drum_kit": True,
         "attack_time": 0.0,
         "decay_time": 0.12,
         "release_time": 0.08,
         "sustain_level": 0.0,
-        "filter_freq": 500.0,
-        "filter_q": 0.5,
+        "filter_freq": 2000.0,
         "vibrato_rate": 0.0,
         "vibrato_depth": 0.0,
         "detune": 0.0,
-        "echo_mix": 0.0,
+        "echo_mix": 0.08,
         "echo_delay_ms": 100.0,
-        "echo_decay": 0.1,
-        "reverb_mix": 0.05,
-        "reverb_roomsize": 0.2,
-        "distortion_mix": 0.2,
-        "distortion_drive": 0.3,
-    },
-    {
-        "name": "Snare",
-        "waveform": "snare",
-        "attack_time": 0.0,
-        "decay_time": 0.08,
-        "release_time": 0.06,
-        "sustain_level": 0.0,
-        "filter_freq": 3500.0,
-        "filter_q": 0.6,
-        "vibrato_rate": 0.0,
-        "vibrato_depth": 0.0,
-        "detune": 0.0,
-        "echo_mix": 0.1,
-        "echo_delay_ms": 80.0,
         "echo_decay": 0.15,
-        "reverb_mix": 0.2,
-        "reverb_roomsize": 0.35,
-        "distortion_mix": 0.15,
-        "distortion_drive": 0.2,
-    },
-    {
-        "name": "Hi-Hat",
-        "waveform": "hihat",
-        "attack_time": 0.0,
-        "decay_time": 0.04,
-        "release_time": 0.03,
-        "sustain_level": 0.0,
-        "filter_freq": 6000.0,
-        "filter_q": 0.4,
-        "vibrato_rate": 0.0,
-        "vibrato_depth": 0.0,
-        "detune": 0.0,
-        "echo_mix": 0.05,
-        "echo_delay_ms": 60.0,
-        "echo_decay": 0.1,
         "reverb_mix": 0.15,
-        "reverb_roomsize": 0.25,
-        "distortion_mix": 0.0,
-        "distortion_drive": 0.0,
-    },
-    {
-        "name": "Metal Perc",
-        "waveform": "metal_perc",
-        "attack_time": 0.0,
-        "decay_time": 0.3,
-        "release_time": 0.4,
-        "sustain_level": 0.0,
-        "filter_freq": 5000.0,
-        "filter_q": 1.0,
-        "vibrato_rate": 0.0,
-        "vibrato_depth": 0.0,
-        "detune": 0.0,
-        "echo_mix": 0.25,
-        "echo_delay_ms": 200.0,
-        "echo_decay": 0.3,
-        "reverb_mix": 0.35,
-        "reverb_roomsize": 0.5,
+        "reverb_roomsize": 0.3,
         "distortion_mix": 0.0,
         "distortion_drive": 0.0,
     },
@@ -569,7 +564,6 @@ VOICES = [
         "release_time": 0.12,
         "sustain_level": 0.6,
         "filter_freq": 2000.0,
-        "filter_q": 2.0,
         "vibrato_rate": 0.0,
         "vibrato_depth": 0.0,
         "detune": 0.0,
@@ -589,7 +583,6 @@ VOICES = [
         "release_time": 1.0,
         "sustain_level": 0.5,
         "filter_freq": 1800.0,
-        "filter_q": 0.5,
         "vibrato_rate": 1.5,
         "vibrato_depth": 0.05,
         "detune": 0.004,
@@ -608,8 +601,7 @@ VOICES = [
         "decay_time": 0.3,
         "release_time": 0.35,
         "sustain_level": 0.6,
-        "filter_freq": 2200.0,
-        "filter_q": 1.8,
+        "filter_freq": 2000.0,
         "vibrato_rate": 4.5,
         "vibrato_depth": 0.05,
         "detune": 0.003,
@@ -631,7 +623,6 @@ VOICES = [
         "release_time": 2.0,
         "sustain_level": 0.7,
         "filter_freq": 1400.0,
-        "filter_q": 0.6,
         "vibrato_rate": 1.8,
         "vibrato_depth": 0.04,
         "detune": 0.005,
@@ -651,7 +642,6 @@ VOICES = [
         "release_time": 1.4,
         "sustain_level": 0.8,
         "filter_freq": 1700.0,
-        "filter_q": 0.85,
         "vibrato_rate": 3.2,
         "vibrato_depth": 0.025,
         "detune": 0.003,
@@ -670,8 +660,7 @@ VOICES = [
         "decay_time": 2.0,
         "release_time": 3.0,
         "sustain_level": 0.9,
-        "filter_freq": 1200.0,
-        "filter_q": 0.5,
+        "filter_freq": 800.0,
         "vibrato_rate": 0.8,
         "vibrato_depth": 0.04,
         "detune": 0.007,
@@ -700,10 +689,15 @@ def get_waveform(name):
     return WAVEFORMS.get(name, wave_sine)
 
 
+def get_drum_sound(key_index):
+    """Return a copy of the drum kit entry for the given key index (wraps)."""
+    return DRUM_KIT[key_index % NUM_DRUM_SOUNDS].copy()
+
+
 # Legacy compatibility -- get_patch maps old names to closest new voice
 _LEGACY_MAP = {
-    "pad": 16,       # Pad
-    "bass": 6,       # Reese Bass
+    "pad": 12,       # Pad
+    "bass": 5,       # Reese Bass
     "pluck": 1,      # Square
     "lead": 3,       # Synth Lead
 }

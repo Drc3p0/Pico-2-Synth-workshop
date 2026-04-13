@@ -1,8 +1,9 @@
 """Pico 2 Synth Engine -- feature-packed, student-configurable.
 
 Supports:
-  - 18 built-in voices (core synth, leads/basses, drums, noise, drone/ambient),
+  - 13 built-in voices (core synth, leads/basses, drum kit, noise, drone/ambient),
     cycled with a dedicated button
+  - Drum kit voice: each key triggers a different drum sound
   - LED voice indicator (NeoPixel or RGB)
   - Buttons and/or capacitive touchpads for notes (any GPIO)
   - Analog inputs on any ADC pin, each mappable to any parameter
@@ -45,7 +46,9 @@ make_shared_i2c = _load_symbol(("lib.inputs", "inputs"), "make_shared_i2c")
 # Patches / voices
 get_voice = _load_symbol(("lib.patches", "patches"), "get_voice")
 get_waveform = _load_symbol(("lib.patches", "patches"), "get_waveform")
+get_drum_sound = _load_symbol(("lib.patches", "patches"), "get_drum_sound")
 NUM_VOICES = _load_symbol(("lib.patches", "patches"), "NUM_VOICES")
+NUM_DRUM_SOUNDS = _load_symbol(("lib.patches", "patches"), "NUM_DRUM_SOUNDS")
 
 # Effects
 EffectsChain = _load_symbol(("lib.fx", "fx"), "EffectsChain")
@@ -75,7 +78,6 @@ VALID_TARGETS = (
     "echo_decay",
     "reverb_mix",
     "reverb_room",
-    "reverb_damp",
     "distortion_mix",
     "distortion_drive",
     "vibrato_depth",
@@ -158,10 +160,9 @@ class SynthEngine:
         self.envelope = self._build_envelope()
 
         # Per-voice synth parameters
-        self.filter_freq = clamp(float(self.voice.get("filter_freq", 1000.0)), 200.0, 8000.0)
-        self.filter_q = clamp(float(self.voice.get("filter_q", 1.0)), 0.5, 4.0)
+        self.filter_freq = clamp(float(self.voice.get("filter_freq", 2000.0)), 50.0, 2000.0)
         self.vibrato_rate = max(0.0, float(self.voice.get("vibrato_rate", 0.0)))
-        self.vibrato_depth = clamp(float(self.voice.get("vibrato_depth", 0.0)), 0.0, 0.1)
+        self.vibrato_depth = clamp(float(self.voice.get("vibrato_depth", 0.0)), 0.0, 0.5)
         self.detune = clamp(float(self.voice.get("detune", 0.0)), 0.0, 0.01)
 
         self.pitch_offset_from_input = 0.0
@@ -340,10 +341,9 @@ class SynthEngine:
         self.waveform = get_waveform(self.voice.get("waveform", "sine"))
         self.envelope = self._build_envelope()
 
-        self.filter_freq = clamp(float(self.voice.get("filter_freq", 1000.0)), 200.0, 8000.0)
-        self.filter_q = clamp(float(self.voice.get("filter_q", 1.0)), 0.5, 4.0)
+        self.filter_freq = clamp(float(self.voice.get("filter_freq", 2000.0)), 50.0, 2000.0)
         self.vibrato_rate = max(0.0, float(self.voice.get("vibrato_rate", 0.0)))
-        self.vibrato_depth = clamp(float(self.voice.get("vibrato_depth", 0.0)), 0.0, 0.1)
+        self.vibrato_depth = clamp(float(self.voice.get("vibrato_depth", 0.0)), 0.0, 0.5)
         self.detune = clamp(float(self.voice.get("detune", 0.0)), 0.0, 0.01)
 
         if self.effects is not None:
@@ -379,7 +379,7 @@ class SynthEngine:
             return synthio.BlockBiquad(
                 synthio.FilterMode.LOW_PASS,
                 frequency=frequency,
-                Q=self.filter_q,
+                Q=0.707,
             )
         except Exception:
             return None
@@ -406,23 +406,46 @@ class SynthEngine:
         self.active_filter = None
         self.active_vibrato = None
 
-    def _press_note(self, midi_note, input_id):
+    def _press_note(self, midi_note, input_id, key_index=None):
         self._release_note()
 
-        note_kwargs = {
-            "waveform": self.waveform,
-            "envelope": self.envelope,
-        }
+        # Drum kit: per-key waveform and envelope
+        is_drum = self.voice.get("is_drum_kit", False)
+        if is_drum and key_index is not None:
+            drum = get_drum_sound(key_index)
+            wf = get_waveform(drum.get("waveform", "kick"))
+            env = synthio.Envelope(
+                attack_time=max(0.0, float(drum.get("attack_time", 0.0))),
+                decay_time=max(0.0, float(drum.get("decay_time", 0.12))),
+                sustain_level=clamp(float(drum.get("sustain_level", 0.0)), 0.0, 1.0),
+                release_time=max(0.0, float(drum.get("release_time", 0.08))),
+            )
+            drum_midi = drum.get("midi_note", midi_note)
+            drum_freq = synthio.midi_to_hz(drum_midi)
+            filt_freq = clamp(float(drum.get("filter_freq", 2000.0)), 50.0, 2000.0)
 
-        self.active_filter = self._build_note_filter(self.filter_freq)
-        if self.active_filter is not None:
-            note_kwargs["filter"] = self.active_filter
+            note_kwargs = {"waveform": wf, "envelope": env}
+            self.active_filter = self._build_note_filter(filt_freq)
+            if self.active_filter is not None:
+                note_kwargs["filter"] = self.active_filter
 
-        self.active_vibrato = self._build_vibrato()
-        if self.active_vibrato is not None:
-            note_kwargs["bend"] = self.active_vibrato
+            note = synthio.Note(drum_freq, **note_kwargs)
+        else:
+            note_kwargs = {
+                "waveform": self.waveform,
+                "envelope": self.envelope,
+            }
 
-        note = synthio.Note(self._note_frequency(midi_note), **note_kwargs)
+            self.active_filter = self._build_note_filter(self.filter_freq)
+            if self.active_filter is not None:
+                note_kwargs["filter"] = self.active_filter
+
+            self.active_vibrato = self._build_vibrato()
+            if self.active_vibrato is not None:
+                note_kwargs["bend"] = self.active_vibrato
+
+            note = synthio.Note(self._note_frequency(midi_note), **note_kwargs)
+
         try:
             note.amplitude = 1.0
         except Exception:
@@ -446,7 +469,7 @@ class SynthEngine:
     # -----------------------------------------------------------------------
 
     def _set_filter_frequency(self, target_frequency):
-        target_frequency = clamp(target_frequency, 200.0, 8000.0)
+        target_frequency = clamp(target_frequency, 50.0, 2000.0)
         self.filter_freq = lerp(self.filter_freq, target_frequency, 0.35)
 
         if self.active_note is None:
@@ -472,7 +495,7 @@ class SynthEngine:
             pass
 
     def _set_vibrato_depth(self, depth):
-        self.vibrato_depth = clamp(depth, 0.0, 0.1)
+        self.vibrato_depth = clamp(depth, 0.0, 0.5)
         if self.active_note is None:
             return
         if self.active_vibrato is not None:
@@ -495,7 +518,7 @@ class SynthEngine:
                 pass
 
     def _set_vibrato_rate(self, rate):
-        self.vibrato_rate = clamp(rate, 0.0, 20.0)
+        self.vibrato_rate = clamp(rate, 0.0, 13.0)
         if self.active_vibrato is not None:
             try:
                 self.active_vibrato.rate = self.vibrato_rate
@@ -512,9 +535,9 @@ class SynthEngine:
         # Filter
         if target in ("filter", "filter_freq"):
             if is_bipolar:
-                freq = map_range((normalized + 1.0) / 2.0, 0.0, 1.0, 200.0, 4000.0)
+                freq = map_range((normalized + 1.0) / 2.0, 0.0, 1.0, 50.0, 2000.0)
             else:
-                freq = map_range(normalized, 0.0, 1.0, 200.0, 4000.0)
+                freq = map_range(normalized, 0.0, 1.0, 50.0, 2000.0)
             self._set_filter_frequency(freq)
 
         # Volume
@@ -536,17 +559,17 @@ class SynthEngine:
         # Vibrato depth
         elif target == "vibrato_depth":
             if is_bipolar:
-                depth = abs(normalized) * 0.1
+                depth = abs(normalized) * 0.5
             else:
-                depth = map_range(normalized, 0.0, 1.0, 0.0, 0.1)
+                depth = map_range(normalized, 0.0, 1.0, 0.0, 0.5)
             self._set_vibrato_depth(depth)
 
         # Vibrato rate
         elif target == "vibrato_rate":
             if is_bipolar:
-                rate = abs(normalized) * 15.0
+                rate = abs(normalized) * 13.0
             else:
-                rate = map_range(normalized, 0.0, 1.0, 0.0, 15.0)
+                rate = map_range(normalized, 0.0, 1.0, 0.0, 13.0)
             self._set_vibrato_rate(rate)
 
         # Attack time (rebuild envelope is expensive, so we store for next note)
@@ -587,9 +610,6 @@ class SynthEngine:
         elif target == "reverb_room":
             if self.effects:
                 self.effects.set_reverb_roomsize(abs(normalized) if is_bipolar else normalized)
-        elif target == "reverb_damp":
-            if self.effects:
-                self.effects.set_reverb_damp(abs(normalized) if is_bipolar else normalized)
 
         # FX: Distortion
         elif target == "distortion_mix":
@@ -608,7 +628,7 @@ class SynthEngine:
             for idx, pressed in self.buttons.check():
                 if pressed:
                     midi = self._midi_note_for_index(idx)
-                    self._press_note(midi, ("button", idx))
+                    self._press_note(midi, ("button", idx), key_index=idx)
                 elif self.active_input_id == ("button", idx):
                     self._release_note()
 
@@ -619,7 +639,7 @@ class SynthEngine:
                 note_idx = self._button_count + idx
                 if pressed:
                     midi = self._midi_note_for_index(note_idx)
-                    self._press_note(midi, ("touch", idx))
+                    self._press_note(midi, ("touch", idx), key_index=note_idx)
                 elif self.active_input_id == ("touch", idx):
                     self._release_note()
 

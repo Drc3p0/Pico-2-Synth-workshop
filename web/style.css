@@ -650,6 +650,27 @@ select:focus, input[type="number"]:focus, input[type="text"]:focus {
   gap: 0.5rem;
 }
 
+.drone-speed-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #A0A0C0;
+  flex: 1;
+  min-width: 180px;
+}
+
+.drone-speed-label input[type="range"] {
+  flex: 1;
+  min-width: 80px;
+}
+
+.drone-speed-label span {
+  color: var(--primary-light);
+  font-weight: 600;
+  min-width: 32px;
+}
+
 .btn-transport {
   padding: 0.4rem 0.85rem;
   border: 2px solid var(--border);
