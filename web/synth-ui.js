@@ -1,5 +1,5 @@
 // ============================================================
-// Synth UI -- Keyboard, voice selector, FX controls
+// Synth UI -- Keyboard, voice selector, FX controls, loop, drone
 // Depends on SynthEngine (synth-engine.js)
 // ============================================================
 
@@ -11,7 +11,7 @@ var SynthUI = (function () {
   var currentScale = "pentatonic";
   var currentOctave = 3;
   var currentNotes = [];
-  var keyHeld = {};  // track held computer keys
+  var keyHeld = {};
 
   // --- Voice buttons -------------------------------------------------------
 
@@ -28,7 +28,6 @@ var SynthUI = (function () {
     }
     container.innerHTML = html;
 
-    // Bind clicks
     var btns = container.querySelectorAll(".voice-btn");
     for (var j = 0; j < btns.length; j++) {
       btns[j].addEventListener("click", function () {
@@ -40,19 +39,17 @@ var SynthUI = (function () {
 
   function selectVoice(index) {
     var newIdx = SynthEngine.setVoice(index);
-    // Update button states
     var btns = document.querySelectorAll(".voice-btn");
     for (var i = 0; i < btns.length; i++) {
       btns[i].classList.toggle("active", i === newIdx);
     }
-    // Sync FX sliders to new voice defaults
     syncSlidersFromEngine();
   }
 
   // --- Keyboard rendering --------------------------------------------------
 
   function updateNotes() {
-    var baseNote = currentOctave * 12 + 24; // octave 1 = MIDI 36
+    var baseNote = currentOctave * 12 + 24;
     currentNotes = SynthEngine.scaleNotes(currentScale, baseNote, NUM_KEYS);
   }
 
@@ -100,10 +97,24 @@ var SynthUI = (function () {
   }
 
   // --- Computer keyboard input ---------------------------------------------
+  // FIX: Only block keyboard events for text-entry inputs, NOT sliders
+
+  function _isTextInput(el) {
+    var tag = el.tagName;
+    if (tag === "TEXTAREA") return true;
+    if (tag === "SELECT") return true;
+    if (tag === "INPUT") {
+      var type = (el.type || "").toLowerCase();
+      // Allow keyboard events while interacting with range sliders
+      if (type === "range") return false;
+      return true; // block for text, number, etc.
+    }
+    return false;
+  }
 
   function onKeyDown(e) {
     if (e.repeat) return;
-    if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA") return;
+    if (_isTextInput(e.target)) return;
 
     // Space = next voice
     if (e.code === "Space") {
@@ -132,6 +143,8 @@ var SynthUI = (function () {
   }
 
   function onKeyUp(e) {
+    if (_isTextInput(e.target)) return;
+
     var key = e.key.toLowerCase();
     var idx = KEY_MAP.indexOf(key);
     if (idx < 0 || idx >= currentNotes.length) return;
@@ -147,22 +160,22 @@ var SynthUI = (function () {
   // --- FX slider binding ---------------------------------------------------
 
   var SLIDER_MAP = [
-    { id: "fx-filter-freq",  param: "filterFreq",  display: "val-filter-freq",  fmt: function(v){return v;},                  unit:"" },
-    { id: "fx-filter-q",     param: "filterQ",      display: "val-filter-q",     fmt: function(v){return parseFloat(v).toFixed(1);}, unit:"" },
-    { id: "fx-echo-mix",     param: "echoMix",      display: "val-echo-mix",     fmt: function(v){return v+"%";},              scale:0.01 },
-    { id: "fx-echo-delay",   param: "echoDelay",    display: "val-echo-delay",   fmt: function(v){return v;},                  scale:0.001 },
-    { id: "fx-echo-decay",   param: "echoDecay",    display: "val-echo-decay",   fmt: function(v){return v+"%";},              scale:0.01 },
-    { id: "fx-reverb-mix",   param: "reverbMix",    display: "val-reverb-mix",   fmt: function(v){return v+"%";},              scale:0.01 },
-    { id: "fx-reverb-room",  param: "reverbRoom",   display: "val-reverb-room",  fmt: function(v){return v+"%";},              scale:0.01 },
-    { id: "fx-dist-mix",     param: "distMix",      display: "val-dist-mix",     fmt: function(v){return v+"%";},              scale:0.01 },
-    { id: "fx-dist-drive",   param: "distDrive",    display: "val-dist-drive",   fmt: function(v){return v+"%";},              scale:0.01 },
-    { id: "fx-vib-depth",    param: "vibratoDepth",  display: "val-vib-depth",    fmt: function(v){return v+"%";},              scale:0.15 },
-    { id: "fx-vib-rate",     param: "vibratoRate",   display: "val-vib-rate",     fmt: function(v){return parseFloat(v).toFixed(1);}, unit:"" },
+    { id: "fx-filter-freq",  param: "filterFreq",  display: "val-filter-freq",  fmt: function(v){return Math.round(v);} },
+    { id: "fx-filter-q",     param: "filterQ",      display: "val-filter-q",     fmt: function(v){return parseFloat(v).toFixed(1);} },
+    { id: "fx-echo-mix",     param: "echoMix",      display: "val-echo-mix",     fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-echo-delay",   param: "echoDelay",    display: "val-echo-delay",   fmt: function(v){return Math.round(v);},        scale:0.001 },
+    { id: "fx-echo-decay",   param: "echoDecay",    display: "val-echo-decay",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-reverb-mix",   param: "reverbMix",    display: "val-reverb-mix",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-reverb-room",  param: "reverbRoom",   display: "val-reverb-room",  fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-dist-mix",     param: "distMix",      display: "val-dist-mix",     fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-dist-drive",   param: "distDrive",    display: "val-dist-drive",   fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
+    { id: "fx-vib-depth",    param: "vibratoDepth",  display: "val-vib-depth",    fmt: function(v){return Math.round(v)+"%";},   scale:0.15 },
+    { id: "fx-vib-rate",     param: "vibratoRate",   display: "val-vib-rate",     fmt: function(v){return parseFloat(v).toFixed(1);} },
     { id: "fx-attack",       param: "attack",        display: "val-attack",       fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
-    { id: "fx-decay",        param: "decay",         display: "val-decay",        fmt: function(v){return v;},                  scale:0.001 },
-    { id: "fx-sustain",      param: "sustain",       display: "val-sustain",      fmt: function(v){return v+"%";},              scale:0.01 },
+    { id: "fx-decay",        param: "decay",         display: "val-decay",        fmt: function(v){return Math.round(v);},       scale:0.001 },
+    { id: "fx-sustain",      param: "sustain",       display: "val-sustain",      fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
     { id: "fx-release",      param: "release",       display: "val-release",      fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
-    { id: "fx-volume",       param: "volume",        display: "val-volume",       fmt: function(v){return v+"%";},              scale:0.01 },
+    { id: "fx-volume",       param: "volume",        display: "val-volume",       fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
   ];
 
   function bindFXSliders() {
@@ -210,12 +223,26 @@ var SynthUI = (function () {
       if (rawVal !== undefined) {
         el.value = rawVal;
         var disp = document.getElementById(s.display);
-        if (disp) disp.textContent = s.fmt(Math.round(rawVal * 100) / 100);
+        if (disp) disp.textContent = s.fmt(rawVal);
       }
     }
   }
 
   // --- Scale/octave controls -----------------------------------------------
+
+  function renderScaleOptions() {
+    var sel = document.getElementById("play-scale");
+    if (!sel) return;
+    sel.innerHTML = "";
+    var labels = SynthEngine.SCALE_LABELS;
+    for (var key in labels) {
+      var opt = document.createElement("option");
+      opt.value = key;
+      opt.textContent = labels[key];
+      if (key === currentScale) opt.selected = true;
+      sel.appendChild(opt);
+    }
+  }
 
   function bindScaleOctave() {
     var scaleSel = document.getElementById("play-scale");
@@ -224,6 +251,11 @@ var SynthUI = (function () {
         currentScale = this.value;
         SynthEngine.allNotesOff();
         renderKeyboard();
+        // Update drone if active
+        if (SynthEngine.isDroneActive()) {
+          SynthEngine.stopDrone();
+          SynthEngine.startDrone(currentScale, currentOctave * 12 + 24);
+        }
       });
     }
 
@@ -235,17 +267,86 @@ var SynthUI = (function () {
         if (octVal) octVal.textContent = currentOctave;
         SynthEngine.allNotesOff();
         renderKeyboard();
+        if (SynthEngine.isDroneActive()) {
+          SynthEngine.stopDrone();
+          SynthEngine.startDrone(currentScale, currentOctave * 12 + 24);
+        }
       });
     }
+  }
+
+  // --- Loop controls -------------------------------------------------------
+
+  function bindLoopControls() {
+    var loopBtn = document.getElementById("btn-loop");
+    if (!loopBtn) return;
+
+    loopBtn.addEventListener("click", function () {
+      if (SynthEngine.isLoopRecording()) {
+        // Stop recording, start playback
+        SynthEngine.stopLoopRecording();
+        SynthEngine.startLoopPlayback();
+        loopBtn.textContent = "Stop Loop";
+        loopBtn.classList.add("active");
+      } else if (SynthEngine.isLoopPlaying()) {
+        // Stop playback
+        SynthEngine.stopLoopPlayback();
+        loopBtn.textContent = "Record Loop";
+        loopBtn.classList.remove("active");
+      } else {
+        // Start recording
+        SynthEngine.startLoopRecording();
+        loopBtn.textContent = "Recording...";
+        loopBtn.classList.add("recording");
+        // Auto-stop after timeout for safety
+        setTimeout(function() {
+          if (SynthEngine.isLoopRecording()) {
+            SynthEngine.stopLoopRecording();
+            if (SynthEngine.hasLoop()) {
+              SynthEngine.startLoopPlayback();
+              loopBtn.textContent = "Stop Loop";
+              loopBtn.classList.remove("recording");
+              loopBtn.classList.add("active");
+            } else {
+              loopBtn.textContent = "Record Loop";
+              loopBtn.classList.remove("recording");
+            }
+          }
+        }, 30000); // 30 second max
+      }
+    });
+  }
+
+  // --- Drone controls ------------------------------------------------------
+
+  function bindDroneControls() {
+    var droneBtn = document.getElementById("btn-drone");
+    if (!droneBtn) return;
+
+    droneBtn.addEventListener("click", function () {
+      if (SynthEngine.isDroneActive()) {
+        SynthEngine.stopDrone();
+        droneBtn.textContent = "Start Drone";
+        droneBtn.classList.remove("active");
+      } else {
+        var baseNote = currentOctave * 12 + 24;
+        SynthEngine.startDrone(currentScale, baseNote);
+        droneBtn.textContent = "Stop Drone";
+        droneBtn.classList.add("active");
+      }
+    });
   }
 
   // --- Init ----------------------------------------------------------------
 
   function init() {
     renderVoiceButtons();
+    renderScaleOptions();
     renderKeyboard();
     bindFXSliders();
     bindScaleOctave();
+    bindLoopControls();
+    bindDroneControls();
 
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
@@ -257,5 +358,7 @@ var SynthUI = (function () {
     renderKeyboard: renderKeyboard,
     syncSlidersFromEngine: syncSlidersFromEngine,
     selectVoice: selectVoice,
+    getCurrentScale: function() { return currentScale; },
+    getCurrentOctave: function() { return currentOctave; },
   };
 })();

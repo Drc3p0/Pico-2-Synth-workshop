@@ -1,7 +1,8 @@
 """Pico 2 Synth Engine -- feature-packed, student-configurable.
 
 Supports:
-  - 8 built-in voices, cycled with a dedicated button
+  - 18 built-in voices (core synth, leads/basses, drums, noise, drone/ambient),
+    cycled with a dedicated button
   - LED voice indicator (NeoPixel or RGB)
   - Buttons and/or capacitive touchpads for notes (any GPIO)
   - Analog inputs on any ADC pin, each mappable to any parameter
