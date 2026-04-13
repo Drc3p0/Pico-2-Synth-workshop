@@ -42,18 +42,18 @@
         <label>Scale
           <select id="play-scale"></select>
         </label>
+        <button class="btn-transport btn-tonality" id="btn-tonality">Major</button>
         <label>Octave
           <input type="range" id="play-octave" min="1" max="7" value="3">
           <span id="play-octave-val">3</span>
         </label>
         <div class="transport-buttons">
           <button class="btn-transport" id="btn-loop">Record Loop</button>
-          <button class="btn-transport" id="btn-drone">Start Drone</button>
-          <button class="btn-transport" id="btn-drone-mode">Mode: Random</button>
+          <button class="btn-transport" id="btn-arp">Start Arp</button>
+          <button class="btn-transport" id="btn-arp-mode">Arp: Up</button>
         </div>
-        <label class="drone-speed-label">Drone Speed <span id="drone-speed-val">50%</span>
-          <input type="range" id="drone-speed" min="0" max="100" value="50">
-          <span class="fx-assign-inline" id="drone-speed-assign"></span>
+        <label class="speed-label">Arp Speed <span id="arp-speed-val">50%</span>
+          <input type="range" id="arp-speed" min="0" max="100" value="50">
         </label>
       </div>
     </section>
@@ -123,16 +123,8 @@
             <input type="range" id="fx-attack" min="0" max="1500" value="10">
           </label>
           <div class="fx-assign-inline" id="fx-attack-assign"></div>
-          <label>Decay <span id="val-decay">200</span>ms
-            <input type="range" id="fx-decay" min="10" max="2000" value="200">
-          </label>
-          <div class="fx-assign-inline" id="fx-decay-assign"></div>
-          <label>Sustain <span id="val-sustain">70%</span>
-            <input type="range" id="fx-sustain" min="0" max="100" value="70">
-          </label>
-          <div class="fx-assign-inline" id="fx-sustain-assign"></div>
           <label>Release <span id="val-release">0.20</span>s
-            <input type="range" id="fx-release" min="10" max="3000" value="200">
+            <input type="range" id="fx-release" min="20" max="3000" value="200">
           </label>
           <div class="fx-assign-inline" id="fx-release-assign"></div>
         </div>
@@ -219,11 +211,17 @@
       <div class="code-output">
         <div class="code-header">
           <span class="filename">code.py</span>
+          <div class="code-format-toggle">
+            <button class="btn btn-fmt active" id="btn-fmt-codepy" type="button">code.py</button>
+            <button class="btn btn-fmt" id="btn-fmt-configjson" type="button">config.json</button>
+          </div>
           <div class="code-actions">
             <button class="btn btn-copy" id="btn-copy" type="button">Copy to Clipboard</button>
             <button class="btn btn-download" id="btn-download" type="button">Download code.py</button>
+            <button class="btn btn-update-pico" id="btn-update-pico" type="button" disabled>Update Pico</button>
           </div>
         </div>
+        <p class="code-format-desc" id="code-format-desc">Standalone file with all settings hardcoded. Copy to CIRCUITPY as code.py -- no other files needed.</p>
         <div class="code-body">
           <pre id="code-preview"></pre>
         </div>

@@ -39,7 +39,8 @@
   // --- Copy & Download -----------------------------------------------------
 
   function copyToClipboard() {
-    var code = ConfigGenerator.getRawCode();
+    var fmt = ConfigGenerator.getFormat();
+    var code = fmt === "configjson" ? ConfigGenerator.getRawConfigJSON() : ConfigGenerator.getRawCode();
     var btn = $("#btn-copy");
 
     function onSuccess() {
@@ -76,17 +77,25 @@
   }
 
   function downloadCode() {
-    var code = ConfigGenerator.getRawCode();
+    var fmt = ConfigGenerator.getFormat();
+    var code, filename;
+    if (fmt === "configjson") {
+      code = ConfigGenerator.getRawConfigJSON();
+      filename = "config.json";
+    } else {
+      code = ConfigGenerator.getRawCode();
+      filename = "code.py";
+    }
     var blob = new Blob([code], { type: "text/plain" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
     a.href = url;
-    a.download = "code.py";
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast("Downloading code.py\u2026");
+    showToast("Downloading " + filename + "\u2026");
   }
 
   function downloadSerialTest() {
@@ -377,6 +386,45 @@
     if (copyBtn) copyBtn.addEventListener("click", copyToClipboard);
     var dlBtn = $("#btn-download");
     if (dlBtn) dlBtn.addEventListener("click", downloadCode);
+
+    // Format toggle
+    var fmtCodePy = $("#btn-fmt-codepy");
+    var fmtConfig = $("#btn-fmt-configjson");
+    if (fmtCodePy) fmtCodePy.addEventListener("click", function () { ConfigGenerator.setFormat("codepy"); });
+    if (fmtConfig) fmtConfig.addEventListener("click", function () { ConfigGenerator.setFormat("configjson"); });
+
+    // Update Pico button
+    var updateBtn = $("#btn-update-pico");
+    if (updateBtn) {
+      updateBtn.addEventListener("click", function () {
+        if (!SerialBridge.isConnected()) {
+          showToast("Connect your Pico first (click Connect Pico in the header)");
+          return;
+        }
+        updateBtn.disabled = true;
+        updateBtn.classList.add("sending");
+        updateBtn.textContent = "Sending...";
+
+        SerialBridge.pushConfigAndSave(function (sent, total) {
+          updateBtn.textContent = "Sending " + sent + "/" + total + "...";
+        }).then(function () {
+          updateBtn.classList.remove("sending");
+          updateBtn.textContent = "Update Pico";
+          updateBtn.disabled = false;
+          showToast("Config saved to Pico!");
+        }).catch(function (err) {
+          updateBtn.classList.remove("sending");
+          updateBtn.textContent = "Update Pico";
+          updateBtn.disabled = false;
+          showToast("Update failed: " + err.message);
+        });
+      });
+
+      // Enable/disable based on serial connection
+      AppState.on("change:serialConnected", function (connected) {
+        updateBtn.disabled = !connected;
+      });
+    }
 
     // Serial test download link
     var serialLink = $("#link-serial-test");

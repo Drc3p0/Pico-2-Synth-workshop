@@ -38,22 +38,22 @@ def _resolve_pin(pin_id):
 # Designed for maximum visual distinctness on cheap LEDs.
 VOICE_COLOURS = [
     (255, 0, 0),       # 0  Sine         -> Red
-    (0, 255, 0),       # 1  Saw          -> Green
-    (0, 0, 255),       # 2  Square       -> Blue
-    (255, 255, 0),     # 3  Triangle     -> Yellow
-    (128, 0, 255),     # 4  Outer Space  -> Purple
-    (255, 128, 0),     # 5  Piano        -> Orange
-    (0, 255, 255),     # 6  Synth Lead   -> Cyan
-    (255, 0, 128),     # 7  Pad          -> Magenta/Pink
+    (0, 0, 255),       # 1  Square       -> Blue
+    (255, 128, 0),     # 2  Piano        -> Orange
+    (0, 255, 255),     # 3  Synth Lead   -> Cyan
+    (0, 255, 0),       # 4  Super Saw    -> Green
+    (128, 0, 255),     # 5  Reese Bass   -> Purple
+    (255, 255, 0),     # 6  Drums        -> Yellow
+    (255, 0, 128),     # 7  Bitcrush     -> Magenta/Pink
+    (128, 128, 128),   # 8  Noise        -> Grey
+    (255, 64, 64),     # 9  Vox          -> Coral
+    (64, 255, 128),    # 10 Pad          -> Mint
+    (0, 128, 255),     # 11 Drone        -> Sky blue
     # Extended slots if students add custom voices:
-    (255, 255, 255),   # 8  White
-    (0, 128, 255),     # 9  Sky blue
-    (128, 255, 0),     # 10 Lime
-    (255, 64, 64),     # 11 Coral
-    (64, 255, 128),    # 12 Mint
-    (255, 0, 255),     # 13 Fuchsia
-    (128, 128, 0),     # 14 Olive
-    (0, 128, 128),     # 15 Teal
+    (255, 255, 255),   # 12 White
+    (128, 255, 0),     # 13 Lime
+    (255, 0, 255),     # 14 Fuchsia
+    (128, 128, 0),     # 15 Olive
 ]
 
 

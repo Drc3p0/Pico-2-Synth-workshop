@@ -9,47 +9,69 @@ var SynthEngine = (function () {
 
   var NOTE_NAMES = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
 
-  // Reduced scale set -- only scales that sound distinctly different
+  // Scales organized as base scales, each with optional major/minor variants.
+  // The Major/Minor toggle switches between variants for scales that have pairs.
+  // Scales without a pair ignore the toggle (button dims).
+
   var SCALES = {
-    pentatonic:       [0,2,4,7,9],
-    minor:            [0,2,3,5,7,8,10],
-    blues:            [0,3,5,6,7,10],
-    chromatic:        [0,1,2,3,4,5,6,7,8,9,10,11],
-    dorian:           [0,2,3,5,7,9,10],
-    phrygian:         [0,1,3,5,7,8,10],
-    lydian:           [0,2,4,6,7,9,11],
-    harmonic_minor:   [0,2,3,5,7,8,11],
-    hungarian_minor:  [0,2,3,6,7,8,11],
-    japanese:         [0,1,5,7,8],
-    whole_tone:       [0,2,4,6,8,10],
-    diminished:       [0,2,3,5,6,8,9,11],
+    pentatonic_major:  [0,2,4,7,9],
+    pentatonic_minor:  [0,3,5,7,10],
+    blues_major:       [0,2,3,5,6,9],
+    blues_minor:       [0,3,5,6,7,10],
+    harmonic_major:    [0,2,4,5,7,9,11],
+    harmonic_minor:    [0,2,3,5,7,8,11],
+    hungarian_major:   [0,3,4,6,7,9,10],
+    hungarian_minor:   [0,2,3,6,7,8,11],
+    chromatic:         [0,1,2,3,4,5,6,7,8,9,10,11],
+    dorian:            [0,2,3,5,7,9,10],
+    egyptian:          [0,2,5,7,10],
+    japanese:          [0,1,5,7,8],
+    whole_tone:        [0,2,4,6,8,10],
   };
 
-  var SCALE_LABELS = {
-    pentatonic: "Pentatonic",
-    minor: "Minor",
-    blues: "Blues",
-    chromatic: "Chromatic",
-    dorian: "Dorian",
-    phrygian: "Phrygian",
-    lydian: "Lydian",
-    harmonic_minor: "Harmonic Minor",
-    hungarian_minor: "Hungarian Minor",
-    japanese: "Japanese (In)",
-    whole_tone: "Whole Tone",
-    diminished: "Diminished",
-  };
+  // Base scale names shown in the dropdown
+  var SCALE_BASES = [
+    { key: "pentatonic", label: "Pentatonic", hasPair: true },
+    { key: "blues",      label: "Blues",       hasPair: true },
+    { key: "harmonic",   label: "Harmonic",    hasPair: true },
+    { key: "hungarian",  label: "Hungarian",   hasPair: true },
+    { key: "chromatic",  label: "Chromatic",   hasPair: false },
+    { key: "dorian",     label: "Dorian",      hasPair: false },
+    { key: "egyptian",   label: "Egyptian",    hasPair: false },
+    { key: "japanese",   label: "Japanese",    hasPair: false },
+    { key: "whole_tone", label: "Whole Tone",  hasPair: false },
+  ];
+
+  // Resolve a base key + tonality ("major"/"minor") to a SCALES key
+  function resolveScaleKey(baseKey, tonality) {
+    // For paired scales, append _major or _minor
+    for (var i = 0; i < SCALE_BASES.length; i++) {
+      if (SCALE_BASES[i].key === baseKey) {
+        if (SCALE_BASES[i].hasPair) {
+          var full = baseKey + "_" + tonality;
+          if (SCALES[full]) return full;
+        }
+        // Unpaired: try the base key directly
+        if (SCALES[baseKey]) return baseKey;
+        // Fallback: try with _major
+        if (SCALES[baseKey + "_major"]) return baseKey + "_major";
+        return baseKey;
+      }
+    }
+    return baseKey;
+  }
+
+  function scaleHasPair(baseKey) {
+    for (var i = 0; i < SCALE_BASES.length; i++) {
+      if (SCALE_BASES[i].key === baseKey) return SCALE_BASES[i].hasPair;
+    }
+    return false;
+  }
 
   // --- Waveform generation (PeriodicWave partials) -------------------------
 
   function makeSinePartials()       { return { real: [0,0], imag: [0,1] }; }
   function makeSquarePartials(n)    { var r=[0],im=[0]; for(var k=1;k<=n;k++){r.push(0);im.push(k%2?1/k:0);} return{real:r,imag:im}; }
-
-  function makeOuterSpacePartials() {
-    var r = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var im= [0, 0.50, 0.15, 0.25, 0.10, 0.03, 0.05, 0.02, 0.04];
-    return { real: r, imag: im };
-  }
 
   function makePianoPartials() {
     return { real: [0,0,0,0,0,0,0,0], imag: [0, 1.0, 0.6, 0.35, 0.20, 0.10, 0.06, 0.03] };
@@ -91,11 +113,12 @@ var SynthEngine = (function () {
     return { real: r, imag: im };
   }
 
-  function makeNoiseWashPartials() {
+  function makeNoisePartials() {
+    // Chaotic noise: dense inharmonic partials with pseudo-random phases/amps
     var r = [0], im = [0];
-    for (var k = 1; k <= 32; k++) {
-      r.push(0);
-      im.push((0.5 / k) * (1 + Math.sin(k * 2.718) * 0.5));
+    for (var k = 1; k <= 47; k++) {
+      r.push(Math.sin(k * 3.731 + Math.sin(k * 1.618) * 2.0) * 0.3 / Math.sqrt(k));
+      im.push((0.6 / Math.sqrt(k)) * (Math.sin(k * 7.919) * 0.7 + 0.3));
     }
     return { real: r, imag: im };
   }
@@ -202,27 +225,26 @@ var SynthEngine = (function () {
 
   var VOICES = [
     // === Core synth ===
-    { name:"Sine",         color:"#ef4444", partials:makeSinePartials,       attack:0.08, decay:0.3,  sustain:0.8,  release:0.4,  filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0, echoDelay:200, echoDecay:0.3, reverbMix:0.15, distMix:0, distDrive:0 },
-    { name:"Square",       color:"#3b82f6", partials:makeSquarePartials,     attack:0.0,  decay:0.1,  sustain:0.65, release:0.15, filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0, echoDelay:180, echoDecay:0.3, reverbMix:0, distMix:0, distDrive:0 },
-    { name:"Piano",        color:"#f97316", partials:makePianoPartials,      attack:0.0,  decay:0.4,  sustain:0.0,  release:0.3,  filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0.1, echoDelay:200, echoDecay:0.2, reverbMix:0.25, distMix:0, distDrive:0 },
+    { name:"Sine",         color:"#ef4444", partials:makeSinePartials,       attack:0.08, release:0.4,  filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0, echoDelay:200, echoDecay:0.3, reverbMix:0.15, distMix:0, distDrive:0 },
+    { name:"Square",       color:"#3b82f6", partials:makeSquarePartials,     attack:0.0,  release:0.15, filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0, echoDelay:180, echoDecay:0.3, reverbMix:0, distMix:0, distDrive:0 },
+    { name:"Piano",        color:"#f97316", partials:makePianoPartials,      attack:0.0,  release:0.3,  filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0.1, echoDelay:200, echoDecay:0.2, reverbMix:0.25, distMix:0, distDrive:0 },
 
     // === Synth leads/basses ===
-    { name:"Synth Lead",   color:"#06b6d4", partials:makeSynthLeadPartials,  attack:0.02, decay:0.12, sustain:0.55, release:0.18, filterFreq:2000, vibratoRate:5.8, vibratoDepth:8, detune:6, echoMix:0.12, echoDelay:150, echoDecay:0.28, reverbMix:0.12, distMix:0.5, distDrive:0.62 },
-    { name:"Super Saw",    color:"#22d3ee", partials:makeSuperSawPartials,   attack:0.01, decay:0.2,  sustain:0.75, release:0.25, filterFreq:2000, vibratoRate:0.3, vibratoDepth:3, detune:12, echoMix:0.08, echoDelay:100, echoDecay:0.2, reverbMix:0.15, distMix:0, distDrive:0 },
-    { name:"Reese Bass",   color:"#a855f7", partials:makeReeseBassPartials,  attack:0.005, decay:0.15, sustain:0.7, release:0.1,  filterFreq:600,  vibratoRate:0.2, vibratoDepth:4, detune:8, echoMix:0, echoDelay:100, echoDecay:0.2, reverbMix:0.05, distMix:0.15, distDrive:0.3 },
+    { name:"Synth Lead",   color:"#06b6d4", partials:makeSynthLeadPartials,  attack:0.02, release:0.18, filterFreq:2000, vibratoRate:5.8, vibratoDepth:8, detune:6, echoMix:0.12, echoDelay:150, echoDecay:0.28, reverbMix:0.12, distMix:0.5, distDrive:0.62 },
+    { name:"Super Saw",    color:"#22d3ee", partials:makeSuperSawPartials,   attack:0.01, release:0.25, filterFreq:2000, vibratoRate:0.3, vibratoDepth:3, detune:12, echoMix:0.08, echoDelay:100, echoDecay:0.2, reverbMix:0.15, distMix:0, distDrive:0 },
+    { name:"Reese Bass",   color:"#a855f7", partials:makeReeseBassPartials,  attack:0.005, release:0.1,  filterFreq:600,  vibratoRate:0.2, vibratoDepth:4, detune:8, echoMix:0, echoDelay:100, echoDecay:0.2, reverbMix:0.05, distMix:0.15, distDrive:0.3 },
 
     // === Drums (single voice, per-key sounds) ===
-    { name:"Drums",        color:"#f59e0b", partials:makeKickPartials, isDrumKit:true, attack:0.0,  decay:0.12, sustain:0.0,  release:0.08, filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0.08, echoDelay:100, echoDecay:0.15, reverbMix:0.15, distMix:0, distDrive:0 },
+    { name:"Drums",        color:"#f59e0b", partials:makeKickPartials, isDrumKit:true, attack:0.0, release:0.08, filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0.08, echoDelay:100, echoDecay:0.15, reverbMix:0.15, distMix:0, distDrive:0 },
 
     // === Noise/experimental ===
-    { name:"Bitcrush",     color:"#14b8a6", partials:makeBitcrushPartials,   attack:0.0,  decay:0.1,  sustain:0.6,  release:0.12, filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0.15, echoDelay:130, echoDecay:0.35, reverbMix:0.1, distMix:0.7, distDrive:0.8 },
-    { name:"Noise Wash",   color:"#64748b", partials:makeNoiseWashPartials,  attack:0.3,  decay:0.8,  sustain:0.5,  release:1.0,  filterFreq:1800, vibratoRate:1.5, vibratoDepth:5, detune:4, echoMix:0.35, echoDelay:350, echoDecay:0.5, reverbMix:0.6, distMix:0.1, distDrive:0.15 },
-    { name:"Vox",          color:"#fb7185", partials:makeVoxPartials,        attack:0.15, decay:0.3,  sustain:0.6,  release:0.35, filterFreq:2000, vibratoRate:4.5, vibratoDepth:5, detune:3, echoMix:0.1, echoDelay:180, echoDecay:0.25, reverbMix:0.3, distMix:0, distDrive:0 },
+    { name:"Bitcrush",     color:"#14b8a6", partials:makeBitcrushPartials,   attack:0.0,  release:0.12, filterFreq:2000, vibratoRate:0, vibratoDepth:0, detune:0, echoMix:0.15, echoDelay:130, echoDecay:0.35, reverbMix:0.1, distMix:0.7, distDrive:0.8 },
+    { name:"Noise",        color:"#64748b", partials:makeNoisePartials,      attack:0.0,  release:0.2,  filterFreq:2000, vibratoRate:6.0, vibratoDepth:12, detune:9, echoMix:0.2, echoDelay:170, echoDecay:0.4, reverbMix:0.25, distMix:0.35, distDrive:0.5 },
+    { name:"Vox",          color:"#fb7185", partials:makeVoxPartials,        attack:0.15, release:0.35, filterFreq:2000, vibratoRate:4.5, vibratoDepth:5, detune:3, echoMix:0.1, echoDelay:180, echoDecay:0.25, reverbMix:0.3, distMix:0, distDrive:0 },
 
     // === Drone/ambient ===
-    { name:"Outer Space",  color:"#8b5cf6", partials:makeOuterSpacePartials, attack:0.6,  decay:1.2,  sustain:0.7,  release:2.0,  filterFreq:1400, vibratoRate:1.8, vibratoDepth:6, detune:5, echoMix:0.45, echoDelay:400, echoDecay:0.55, reverbMix:0.7, distMix:0, distDrive:0 },
-    { name:"Pad",          color:"#ec4899", partials:makePadPartials,        attack:0.45, decay:0.9,  sustain:0.8,  release:1.4,  filterFreq:1700, vibratoRate:3.2, vibratoDepth:3, detune:3, echoMix:0.15, echoDelay:280, echoDecay:0.35, reverbMix:0.52, distMix:0, distDrive:0 },
-    { name:"Drone",        color:"#059669", partials:makeDronePartials,      attack:0.8,  decay:2.0,  sustain:0.9,  release:3.0,  filterFreq:800,  vibratoRate:0.8, vibratoDepth:4, detune:7, echoMix:0.3, echoDelay:500, echoDecay:0.6, reverbMix:0.75, distMix:0, distDrive:0 },
+    { name:"Pad",          color:"#ec4899", partials:makePadPartials,        attack:0.45, release:1.4,  filterFreq:1700, vibratoRate:3.2, vibratoDepth:3, detune:3, echoMix:0.15, echoDelay:280, echoDecay:0.35, reverbMix:0.52, distMix:0, distDrive:0 },
+    { name:"Drone",        color:"#059669", partials:makeDronePartials,      attack:0.8,  release:3.0,  filterFreq:800,  vibratoRate:0.8, vibratoDepth:4, detune:7, echoMix:0.3, echoDelay:500, echoDecay:0.6, reverbMix:0.75, distMix:0, distDrive:0 },
   ];
 
   // --- Engine state --------------------------------------------------------
@@ -259,8 +281,6 @@ var SynthEngine = (function () {
     vibratoDepth: 0,
     vibratoRate: 5,
     attack: 0.01,
-    decay: 0.2,
-    sustain: 0.7,
     release: 0.2,
     volume: 0.8,
   };
@@ -272,14 +292,6 @@ var SynthEngine = (function () {
   var loopStartTime = 0;
   var loopDuration = 0;
   var loopTimeoutIds = [];
-
-  // --- Drone state ---------------------------------------------------------
-  var droneActive = false;
-  var droneTimeoutId = null;
-  var droneNotes = [];
-  var droneSpeed = 0.5;      // 0=slow, 1=fast
-  var droneMode = "random";  // "random" or "chords"
-  var droneChordIndex = 0;
 
   // --- Init ----------------------------------------------------------------
 
@@ -415,7 +427,7 @@ var SynthEngine = (function () {
   }
 
   function scaleNotes(scaleName, baseNote, count) {
-    var intervals = SCALES[scaleName] || SCALES.pentatonic;
+    var intervals = SCALES[scaleName] || SCALES.pentatonic_major;
     var notes = [];
     for (var i = 0; i < count; i++) {
       var octaveOffset = Math.floor(i / intervals.length) * 12;
@@ -449,7 +461,7 @@ var SynthEngine = (function () {
     var voice = VOICES[currentVoiceIndex];
     var osc = ctx.createOscillator();
 
-    var noteAttack, noteDecay, noteSustain, noteRelease;
+    var noteAttack, noteRelease;
 
     if (voice.isDrumKit && typeof keyIndex === "number") {
       // Per-key drum sounds
@@ -458,8 +470,6 @@ var SynthEngine = (function () {
       osc.setPeriodicWave(drumWaves[drumIdx]);
       osc.frequency.value = midiToFreq(drum.baseNote);
       noteAttack = drum.attack;
-      noteDecay = drum.decay;
-      noteSustain = drum.sustain;
       noteRelease = drum.release;
     } else {
       osc.setPeriodicWave(periodicWaves[currentVoiceIndex]);
@@ -467,18 +477,13 @@ var SynthEngine = (function () {
       if (voice.detune) osc.detune.value = voice.detune;
       vibratoGain.connect(osc.detune);
       noteAttack = fxState.attack;
-      noteDecay = fxState.decay;
-      noteSustain = fxState.sustain;
       noteRelease = fxState.release;
     }
 
+    // Simple AR envelope: attack ramps to 1.0, holds until noteOff
     var envGain = ctx.createGain();
     envGain.gain.setValueAtTime(0, now);
     envGain.gain.linearRampToValueAtTime(1.0, now + Math.max(0.001, noteAttack));
-    envGain.gain.linearRampToValueAtTime(
-      noteSustain,
-      now + Math.max(0.001, noteAttack) + Math.max(0.001, noteDecay)
-    );
 
     osc.connect(envGain);
     envGain.connect(filterNode);
@@ -496,11 +501,14 @@ var SynthEngine = (function () {
       loopEvents.push({ time: Date.now() - loopStartTime, type: "off", midi: midi });
     }
 
+    // Smooth exponential taper to avoid abrupt cutoff
     var now = ctx.currentTime;
-    var releaseTime = Math.max(0.01, note.release);
+    var releaseTime = Math.max(0.02, note.release);
     note.gain.gain.cancelScheduledValues(now);
     note.gain.gain.setValueAtTime(note.gain.gain.value, now);
-    note.gain.gain.linearRampToValueAtTime(0, now + releaseTime);
+    // Exponential ramp to near-zero for natural fade, then silence
+    note.gain.gain.exponentialRampToValueAtTime(0.001, now + releaseTime);
+    note.gain.gain.linearRampToValueAtTime(0, now + releaseTime + 0.01);
     note.osc.stop(now + releaseTime + 0.05);
   }
 
@@ -516,8 +524,6 @@ var SynthEngine = (function () {
     var voice = VOICES[currentVoiceIndex];
     fxState.filterFreq = voice.filterFreq;
     fxState.attack = voice.attack;
-    fxState.decay = voice.decay;
-    fxState.sustain = voice.sustain;
     fxState.release = voice.release;
     fxState.vibratoRate = voice.vibratoRate;
     fxState.vibratoDepth = voice.vibratoDepth;
@@ -611,94 +617,113 @@ var SynthEngine = (function () {
   function isLoopPlaying() { return loopPlaying; }
   function hasLoop() { return loopEvents.length > 0; }
 
-  // --- Drone mode ----------------------------------------------------------
+  // --- Arpeggiator ---------------------------------------------------------
 
-  function setDroneSpeed(speed) { droneSpeed = Math.max(0, Math.min(1, speed)); }
-  function getDroneSpeed() { return droneSpeed; }
+  var ARP_MODES = ["up", "down", "updown", "random"];
+  var ARP_MODE_LABELS = { up: "Up", down: "Down", updown: "Up/Down", random: "Random" };
 
-  function setDroneMode(mode) {
-    droneMode = (mode === "chords") ? "chords" : "random";
-    droneChordIndex = 0;
+  var arpActive = false;
+  var arpMode = "up";
+  var arpSpeed = 0.5;       // 0=slow, 1=fast  (maps to BPM-ish interval)
+  var arpNotes = [];         // MIDI notes in scale order
+  var arpIndex = 0;
+  var arpDirection = 1;      // 1=ascending, -1=descending (for updown)
+  var arpTimeoutId = null;
+  var arpCurrentNote = null;
+
+  function setArpMode(mode) {
+    if (ARP_MODES.indexOf(mode) >= 0) arpMode = mode;
+    arpIndex = 0;
+    arpDirection = 1;
   }
-  function getDroneMode() { return droneMode; }
+  function getArpMode() { return arpMode; }
+  function nextArpMode() {
+    var idx = ARP_MODES.indexOf(arpMode);
+    setArpMode(ARP_MODES[(idx + 1) % ARP_MODES.length]);
+    return arpMode;
+  }
 
-  function startDrone(scaleName, baseNote) {
+  function setArpSpeed(speed) { arpSpeed = Math.max(0, Math.min(1, speed)); }
+  function getArpSpeed() { return arpSpeed; }
+
+  function startArp(scaleName, baseNote) {
     ensureContext();
     if (ctx.state === "suspended") ctx.resume();
-    droneActive = true;
-    droneChordIndex = 0;
-    var intervals = SCALES[scaleName] || SCALES.pentatonic;
-    droneNotes = [];
-    for (var i = 0; i < intervals.length * 2 && i < 14; i++) {
+    stopArp();
+    arpActive = true;
+    arpIndex = 0;
+    arpDirection = 1;
+    var intervals = SCALES[scaleName] || SCALES.pentatonic_major;
+    arpNotes = [];
+    // Two octaves of notes
+    for (var i = 0; i < intervals.length * 2 && i < 24; i++) {
       var oct = Math.floor(i / intervals.length) * 12;
-      droneNotes.push(baseNote + intervals[i % intervals.length] + oct);
+      arpNotes.push(baseNote + intervals[i % intervals.length] + oct);
     }
-    _droneStep();
+    _arpStep();
   }
 
-  function _droneStep() {
-    if (!droneActive || droneNotes.length === 0) return;
+  function _arpStep() {
+    if (!arpActive || arpNotes.length === 0) return;
 
-    var chosen = [];
+    // Release previous note
+    if (arpCurrentNote !== null) {
+      noteOff(arpCurrentNote);
+      arpCurrentNote = null;
+    }
 
-    if (droneMode === "chords") {
-      // Rhythmic chords: play triads walking through the scale
-      var root = droneChordIndex % droneNotes.length;
-      chosen.push(droneNotes[root]);
-      if (root + 2 < droneNotes.length) chosen.push(droneNotes[root + 2]);
-      if (root + 4 < droneNotes.length) chosen.push(droneNotes[root + 4]);
-      droneChordIndex++;
+    // Pick next note based on mode
+    var midi;
+    if (arpMode === "random") {
+      midi = arpNotes[Math.floor(Math.random() * arpNotes.length)];
     } else {
-      // Random: pick 1-3 random notes from the scale
-      var count = 1 + Math.floor(Math.random() * 2);
-      for (var i = 0; i < count; i++) {
-        var n = droneNotes[Math.floor(Math.random() * droneNotes.length)];
-        if (chosen.indexOf(n) < 0) chosen.push(n);
-      }
+      midi = arpNotes[arpIndex];
     }
+    noteOn(midi);
+    arpCurrentNote = midi;
 
-    for (var j = 0; j < chosen.length; j++) noteOn(chosen[j]);
-
-    // Speed maps: 0=slow (1600ms hold, 1200ms gap), 1=fast (200ms hold, 100ms gap)
-    var holdBase = 1600 - droneSpeed * 1400;
-    var gapBase = 1200 - droneSpeed * 1100;
-    var holdTime, gap;
-
-    if (droneMode === "chords") {
-      // Rhythmic: consistent timing
-      holdTime = holdBase;
-      gap = gapBase * 0.3;
-    } else {
-      // Random: varied timing
-      holdTime = holdBase * (0.5 + Math.random() * 0.5);
-      gap = gapBase * (0.3 + Math.random() * 0.4);
+    // Advance index
+    if (arpMode === "up") {
+      arpIndex = (arpIndex + 1) % arpNotes.length;
+    } else if (arpMode === "down") {
+      arpIndex = arpIndex - 1;
+      if (arpIndex < 0) arpIndex = arpNotes.length - 1;
+    } else if (arpMode === "updown") {
+      arpIndex += arpDirection;
+      if (arpIndex >= arpNotes.length - 1) { arpIndex = arpNotes.length - 1; arpDirection = -1; }
+      if (arpIndex <= 0) { arpIndex = 0; arpDirection = 1; }
     }
+    // random mode doesn't need index advance
 
-    setTimeout(function() {
-      for (var k = 0; k < chosen.length; k++) noteOff(chosen[k]);
-    }, holdTime);
-
-    droneTimeoutId = setTimeout(function() { _droneStep(); }, holdTime + gap);
+    // Speed maps: 0=slow (500ms), 1=fast (80ms)
+    var interval = 500 - arpSpeed * 420;
+    arpTimeoutId = setTimeout(function() { _arpStep(); }, interval);
   }
 
-  function stopDrone() {
-    droneActive = false;
-    if (droneTimeoutId) clearTimeout(droneTimeoutId);
-    droneTimeoutId = null;
-    allNotesOff();
+  function stopArp() {
+    arpActive = false;
+    if (arpTimeoutId) clearTimeout(arpTimeoutId);
+    arpTimeoutId = null;
+    if (arpCurrentNote !== null) {
+      noteOff(arpCurrentNote);
+      arpCurrentNote = null;
+    }
   }
 
-  function isDroneActive() { return droneActive; }
+  function isArpActive() { return arpActive; }
 
   // --- Public API ----------------------------------------------------------
 
   return {
     VOICES: VOICES,
     SCALES: SCALES,
-    SCALE_LABELS: SCALE_LABELS,
+    SCALE_BASES: SCALE_BASES,
     NOTE_NAMES: NOTE_NAMES,
     DRUM_KIT: DRUM_KIT,
     fxState: fxState,
+
+    resolveScaleKey: resolveScaleKey,
+    scaleHasPair: scaleHasPair,
 
     ensureContext: ensureContext,
     noteOn: noteOn,
@@ -725,12 +750,15 @@ var SynthEngine = (function () {
     isLoopPlaying: isLoopPlaying,
     hasLoop: hasLoop,
 
-    startDrone: startDrone,
-    stopDrone: stopDrone,
-    isDroneActive: isDroneActive,
-    setDroneSpeed: setDroneSpeed,
-    getDroneSpeed: getDroneSpeed,
-    setDroneMode: setDroneMode,
-    getDroneMode: getDroneMode,
+    startArp: startArp,
+    stopArp: stopArp,
+    isArpActive: isArpActive,
+    setArpMode: setArpMode,
+    getArpMode: getArpMode,
+    nextArpMode: nextArpMode,
+    setArpSpeed: setArpSpeed,
+    getArpSpeed: getArpSpeed,
+    ARP_MODES: ARP_MODES,
+    ARP_MODE_LABELS: ARP_MODE_LABELS,
   };
 })();

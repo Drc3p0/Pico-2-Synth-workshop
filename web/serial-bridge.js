@@ -274,16 +274,49 @@ var SerialBridge = (function () {
       case "vibratoDepth":  v = normalized * 0.5; break;
       case "vibratoRate":   v = normalized * 13; break;
       case "attack":        v = normalized * 1.5; break;
-      case "decay":         v = 0.01 + normalized * 1.99; break;
-      case "sustain":       v = normalized; break;
-      case "release":       v = 0.01 + normalized * 2.99; break;
+      case "release":       v = 0.02 + normalized * 2.98; break;
       case "volume":        v = normalized; break;
-      case "droneSpeed":    SynthEngine.setDroneSpeed(normalized); return;
       default: return;
     }
     SynthEngine.setParam(param, v);
     // Emit so UI can update sliders
     AppState.emit("serial:param", { param: param, value: v, normalized: normalized });
+  }
+
+  // --- Push config to Pico and save to flash --------------------------------
+
+  async function pushConfigAndSave(onProgress) {
+    if (!connected || !port) {
+      throw new Error("Not connected");
+    }
+    // Build the config JSON from AppState
+    var configJSON = AppState.generateConfigJSON();
+    var config;
+    try {
+      config = JSON.parse(configJSON);
+    } catch (e) {
+      throw new Error("Invalid config");
+    }
+
+    // Send each top-level key as a SET command
+    var keys = Object.keys(config);
+    var total = keys.length + 1; // +1 for SAVE
+    var sent = 0;
+
+    for (var i = 0; i < keys.length; i++) {
+      var key = keys[i];
+      var value = JSON.stringify(config[key]);
+      await _sendCommand("SET:" + key + ":" + value);
+      sent++;
+      if (onProgress) onProgress(sent, total);
+      // Small delay between commands to avoid overwhelming the Pico
+      await new Promise(function(resolve) { setTimeout(resolve, 30); });
+    }
+
+    // Send SAVE to persist to flash
+    await _sendCommand("SAVE");
+    sent++;
+    if (onProgress) onProgress(sent, total);
   }
 
   // --- Public API ----------------------------------------------------------
@@ -293,5 +326,6 @@ var SerialBridge = (function () {
     isConnected: isConnected,
     connect: connect,
     disconnect: disconnect,
+    pushConfigAndSave: pushConfigAndSave,
   };
 })();

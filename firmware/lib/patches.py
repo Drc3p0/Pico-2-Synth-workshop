@@ -252,16 +252,19 @@ def _gen_bitcrush():
     return _to_wave(vals)
 
 
-def _gen_noise_wash():
-    """Dense harmonic wash -- all partials with pseudo-random amplitudes."""
+def _gen_noise():
+    """Chaotic noise -- dense inharmonic partials with randomised phases
+    and wildly varying amplitudes for a harsh, unpredictable texture."""
     vals = []
     for i in range(WAVE_SIZE):
         phase = (2.0 * math.pi * i) / WAVE_SIZE
         sample = 0.0
-        for k in range(1, 33):
-            amp = (0.5 / k) * (1 + math.sin(k * 2.718) * 0.5)
-            sample += math.sin(phase * k) * amp
-        vals.append(sample * WAVE_AMP * 0.30)
+        for k in range(1, 48):
+            # Pseudo-random amplitude and phase offset per partial
+            amp = (0.6 / math.sqrt(k)) * (math.sin(k * 7.919) * 0.7 + 0.3)
+            ph_off = k * 3.731 + math.sin(k * 1.618) * 2.0
+            sample += math.sin(phase * k + ph_off) * amp
+        vals.append(sample * WAVE_AMP * 0.22)
     return _to_wave(vals)
 
 
@@ -279,21 +282,6 @@ def _gen_vox():
 
 
 # === Drone / ambient =======================================================
-
-def _gen_outer_space():
-    """Detuned sine with secondary harmonic -- eerie, spacey timbre."""
-    vals = []
-    for i in range(WAVE_SIZE):
-        phase = (2.0 * math.pi * i) / WAVE_SIZE
-        sample = (
-            math.sin(phase) * 0.50
-            + math.sin(phase * 1.498) * 0.25
-            + math.sin(phase * 0.501) * 0.15
-            + math.sin(phase * 3.003) * 0.10
-        )
-        vals.append(sample * WAVE_AMP)
-    return _to_wave(vals)
-
 
 def _gen_pad():
     """Warm, round waveform for ambient pads -- sine with gentle even harmonics."""
@@ -314,8 +302,7 @@ def _gen_drone():
     """Rich organ-like drone with strong bass undertone.
 
     Heavy on low harmonics (1st, 2nd, 3rd) plus 5th and octave partials
-    for a warm, rumbling foundation distinct from Pad (gentle) and
-    Outer Space (detuned/eerie).
+    for a warm, rumbling foundation distinct from Pad (gentle).
     """
     partials = [
         (1, 1.0), (2, 0.85), (3, 0.7), (4, 0.4),
@@ -351,9 +338,8 @@ wave_rim = _gen_rim()
 wave_cowbell = _gen_cowbell()
 wave_shaker = _gen_shaker()
 wave_bitcrush = _gen_bitcrush()
-wave_noise_wash = _gen_noise_wash()
+wave_noise = _gen_noise()
 wave_vox = _gen_vox()
-wave_outer_space = _gen_outer_space()
 wave_pad = _gen_pad()
 wave_drone = _gen_drone()
 
@@ -374,9 +360,8 @@ WAVEFORMS = {
     "cowbell": wave_cowbell,
     "shaker": wave_shaker,
     "bitcrush": wave_bitcrush,
-    "noise_wash": wave_noise_wash,
+    "noise": wave_noise,
     "vox": wave_vox,
-    "outer_space": wave_outer_space,
     "pad": wave_pad,
     "drone": wave_drone,
 }
@@ -576,23 +561,23 @@ VOICES = [
         "distortion_drive": 0.8,
     },
     {
-        "name": "Noise Wash",
-        "waveform": "noise_wash",
-        "attack_time": 0.3,
-        "decay_time": 0.8,
-        "release_time": 1.0,
-        "sustain_level": 0.5,
-        "filter_freq": 1800.0,
-        "vibrato_rate": 1.5,
-        "vibrato_depth": 0.05,
-        "detune": 0.004,
-        "echo_mix": 0.35,
-        "echo_delay_ms": 350.0,
-        "echo_decay": 0.5,
-        "reverb_mix": 0.6,
-        "reverb_roomsize": 0.8,
-        "distortion_mix": 0.1,
-        "distortion_drive": 0.15,
+        "name": "Noise",
+        "waveform": "noise",
+        "attack_time": 0.0,
+        "decay_time": 0.15,
+        "release_time": 0.2,
+        "sustain_level": 0.7,
+        "filter_freq": 2000.0,
+        "vibrato_rate": 6.0,
+        "vibrato_depth": 0.12,
+        "detune": 0.009,
+        "echo_mix": 0.2,
+        "echo_delay_ms": 170.0,
+        "echo_decay": 0.4,
+        "reverb_mix": 0.25,
+        "reverb_roomsize": 0.4,
+        "distortion_mix": 0.35,
+        "distortion_drive": 0.5,
     },
     {
         "name": "Vox",
@@ -615,25 +600,6 @@ VOICES = [
     },
 
     # === Drone / ambient ===
-    {
-        "name": "Outer Space",
-        "waveform": "outer_space",
-        "attack_time": 0.6,
-        "decay_time": 1.2,
-        "release_time": 2.0,
-        "sustain_level": 0.7,
-        "filter_freq": 1400.0,
-        "vibrato_rate": 1.8,
-        "vibrato_depth": 0.04,
-        "detune": 0.005,
-        "echo_mix": 0.45,
-        "echo_delay_ms": 400.0,
-        "echo_decay": 0.55,
-        "reverb_mix": 0.7,
-        "reverb_roomsize": 0.9,
-        "distortion_mix": 0.0,
-        "distortion_drive": 0.0,
-    },
     {
         "name": "Pad",
         "waveform": "pad",
@@ -696,7 +662,7 @@ def get_drum_sound(key_index):
 
 # Legacy compatibility -- get_patch maps old names to closest new voice
 _LEGACY_MAP = {
-    "pad": 12,       # Pad
+    "pad": 10,       # Pad
     "bass": 5,       # Reese Bass
     "pluck": 1,      # Square
     "lead": 3,       # Synth Lead

@@ -1,5 +1,5 @@
 // ============================================================
-// Synth UI -- Keyboard, voice selector, FX controls, loop, drone
+// Synth UI -- Keyboard, voice selector, FX controls, loop, arp
 // Now includes inline pin assignment dropdowns for each key and FX slider.
 // Depends on SynthEngine, AppState
 // ============================================================
@@ -227,8 +227,6 @@ var SynthUI = (function () {
     { id: "fx-vib-depth",    param: "vibratoDepth",    display: "val-vib-depth",    fmt: function(v){return Math.round(v)+"%";},   scale:0.50 },
     { id: "fx-vib-rate",     param: "vibratoRate",     display: "val-vib-rate",     fmt: function(v){return parseFloat(v).toFixed(1);} },
     { id: "fx-attack",       param: "attack",          display: "val-attack",       fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
-    { id: "fx-decay",        param: "decay",           display: "val-decay",        fmt: function(v){return Math.round(v);},       scale:0.001 },
-    { id: "fx-sustain",      param: "sustain",         display: "val-sustain",      fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
     { id: "fx-release",      param: "release",         display: "val-release",      fmt: function(v){return (v/1000).toFixed(2);}, scale:0.001 },
     { id: "fx-volume",       param: "volume",          display: "val-volume",       fmt: function(v){return Math.round(v)+"%";},   scale:0.01 },
   ];
@@ -323,8 +321,6 @@ var SynthUI = (function () {
       "fx-vib-depth": fs.vibratoDepth / 0.50 * 100,
       "fx-vib-rate": fs.vibratoRate,
       "fx-attack": fs.attack * 1000,
-      "fx-decay": fs.decay * 1000,
-      "fx-sustain": fs.sustain * 100,
       "fx-release": fs.release * 1000,
       "fx-volume": fs.volume * 100,
     };
@@ -348,30 +344,61 @@ var SynthUI = (function () {
     var sel = document.getElementById("play-scale");
     if (!sel) return;
     sel.innerHTML = "";
-    var labels = SynthEngine.SCALE_LABELS;
-    var currentScale = AppState.get("scale");
-    for (var key in labels) {
+    var bases = SynthEngine.SCALE_BASES;
+    var currentBase = AppState.get("scaleBase");
+    for (var i = 0; i < bases.length; i++) {
       var opt = document.createElement("option");
-      opt.value = key;
-      opt.textContent = labels[key];
-      if (key === currentScale) opt.selected = true;
+      opt.value = bases[i].key;
+      opt.textContent = bases[i].label;
+      if (bases[i].key === currentBase) opt.selected = true;
       sel.appendChild(opt);
     }
+  }
+
+  function _updateTonalityButton() {
+    var btn = document.getElementById("btn-tonality");
+    if (!btn) return;
+    var tonality = AppState.get("tonality");
+    var baseKey = AppState.get("scaleBase");
+    var hasPair = SynthEngine.scaleHasPair(baseKey);
+    btn.textContent = tonality === "minor" ? "Minor" : "Major";
+    btn.classList.toggle("active", tonality === "minor");
+    btn.disabled = !hasPair;
+    btn.classList.toggle("disabled", !hasPair);
   }
 
   function bindScaleOctave() {
     var scaleSel = document.getElementById("play-scale");
     if (scaleSel) {
       scaleSel.addEventListener("change", function () {
-        AppState.set("scale", this.value);
+        AppState.set("scaleBase", this.value);
+        _updateTonalityButton();
         SynthEngine.allNotesOff();
         renderKeyboard();
-        if (SynthEngine.isDroneActive()) {
-          SynthEngine.stopDrone();
+        if (SynthEngine.isArpActive()) {
+          SynthEngine.stopArp();
           var octave = AppState.get("octave");
-          SynthEngine.startDrone(this.value, octave * 12 + 24);
+          SynthEngine.startArp(AppState.get("scale"), octave * 12 + 24);
         }
       });
+    }
+
+    var tonalityBtn = document.getElementById("btn-tonality");
+    if (tonalityBtn) {
+      tonalityBtn.addEventListener("click", function () {
+        var current = AppState.get("tonality");
+        var next = current === "major" ? "minor" : "major";
+        AppState.set("tonality", next);
+        _updateTonalityButton();
+        SynthEngine.allNotesOff();
+        renderKeyboard();
+        if (SynthEngine.isArpActive()) {
+          SynthEngine.stopArp();
+          var octave = AppState.get("octave");
+          SynthEngine.startArp(AppState.get("scale"), octave * 12 + 24);
+        }
+      });
+      _updateTonalityButton();
     }
 
     var octSlider = document.getElementById("play-octave");
@@ -383,9 +410,9 @@ var SynthUI = (function () {
         if (octVal) octVal.textContent = octave;
         SynthEngine.allNotesOff();
         renderKeyboard();
-        if (SynthEngine.isDroneActive()) {
-          SynthEngine.stopDrone();
-          SynthEngine.startDrone(AppState.get("scale"), octave * 12 + 24);
+        if (SynthEngine.isArpActive()) {
+          SynthEngine.stopArp();
+          SynthEngine.startArp(AppState.get("scale"), octave * 12 + 24);
         }
       });
     }
@@ -429,75 +456,50 @@ var SynthUI = (function () {
     });
   }
 
-  // --- Drone controls ------------------------------------------------------
+  // --- Arpeggiator controls -------------------------------------------------
 
-  function bindDroneControls() {
-    var droneBtn = document.getElementById("btn-drone");
-    if (!droneBtn) return;
+  function bindArpControls() {
+    var arpBtn = document.getElementById("btn-arp");
+    if (!arpBtn) return;
 
-    droneBtn.addEventListener("click", function () {
-      if (SynthEngine.isDroneActive()) {
-        SynthEngine.stopDrone();
-        droneBtn.textContent = "Start Drone";
-        droneBtn.classList.remove("active");
+    arpBtn.addEventListener("click", function () {
+      if (SynthEngine.isArpActive()) {
+        SynthEngine.stopArp();
+        arpBtn.textContent = "Start Arp";
+        arpBtn.classList.remove("active");
       } else {
         var octave = AppState.get("octave");
         var scale = AppState.get("scale");
-        SynthEngine.startDrone(scale, octave * 12 + 24);
-        droneBtn.textContent = "Stop Drone";
-        droneBtn.classList.add("active");
+        SynthEngine.startArp(scale, octave * 12 + 24);
+        arpBtn.textContent = "Stop Arp";
+        arpBtn.classList.add("active");
       }
     });
 
-    var speedSlider = document.getElementById("drone-speed");
-    var speedVal = document.getElementById("drone-speed-val");
+    var modeBtn = document.getElementById("btn-arp-mode");
+    if (modeBtn) {
+      modeBtn.addEventListener("click", function () {
+        var newMode = SynthEngine.nextArpMode();
+        modeBtn.textContent = "Arp: " + (SynthEngine.ARP_MODE_LABELS[newMode] || newMode);
+        if (SynthEngine.isArpActive()) {
+          SynthEngine.stopArp();
+          var octave = AppState.get("octave");
+          var scale = AppState.get("scale");
+          SynthEngine.startArp(scale, octave * 12 + 24);
+          var ab = document.getElementById("btn-arp");
+          if (ab) { ab.textContent = "Stop Arp"; ab.classList.add("active"); }
+        }
+      });
+    }
+
+    var speedSlider = document.getElementById("arp-speed");
+    var speedVal = document.getElementById("arp-speed-val");
     if (speedSlider) {
       speedSlider.addEventListener("input", function () {
         var v = parseFloat(this.value) / 100;
-        SynthEngine.setDroneSpeed(v);
+        SynthEngine.setArpSpeed(v);
         if (speedVal) speedVal.textContent = Math.round(v * 100) + "%";
       });
-    }
-
-    var modeBtn = document.getElementById("btn-drone-mode");
-    if (modeBtn) {
-      modeBtn.addEventListener("click", function () {
-        var current = SynthEngine.getDroneMode();
-        var next = current === "random" ? "chords" : "random";
-        SynthEngine.setDroneMode(next);
-        modeBtn.textContent = next === "chords" ? "Mode: Chords" : "Mode: Random";
-        if (SynthEngine.isDroneActive()) {
-          SynthEngine.stopDrone();
-          var octave = AppState.get("octave");
-          var scale = AppState.get("scale");
-          SynthEngine.startDrone(scale, octave * 12 + 24);
-          var drBtn = document.getElementById("btn-drone");
-          if (drBtn) { drBtn.textContent = "Stop Drone"; drBtn.classList.add("active"); }
-        }
-      });
-    }
-
-    // Drone speed assignment dropdown
-    var droneAssign = document.getElementById("drone-speed-assign");
-    if (droneAssign) {
-      var fa = AppState.get("fxAssignments").droneSpeed || { source: "none", pin: null };
-      var sources = AppState.ANALOG_SOURCES;
-      var html = '<select class="fx-assign-source" data-param="droneSpeed">';
-      for (var j = 0; j < sources.length; j++) {
-        var sel = sources[j].value === fa.source ? " selected" : "";
-        html += '<option value="' + sources[j].value + '"' + sel + '>' + sources[j].label + '</option>';
-      }
-      html += '</select>';
-      if (fa.source === "pot" || fa.source === "ldr") {
-        html += ' <select class="fx-assign-pin" data-param="droneSpeed">';
-        var adcPins = AppState.ADC_PINS;
-        for (var p = 0; p < adcPins.length; p++) {
-          var psel = adcPins[p] === fa.pin ? " selected" : "";
-          html += '<option value="' + adcPins[p] + '"' + psel + '>GP' + adcPins[p] + '</option>';
-        }
-        html += '</select>';
-      }
-      droneAssign.innerHTML = html;
     }
   }
 
@@ -543,7 +545,7 @@ var SynthUI = (function () {
     renderFxAssignDropdowns();
     bindScaleOctave();
     bindLoopControls();
-    bindDroneControls();
+    bindArpControls();
     bindSerialControls();
 
     document.addEventListener("keydown", onKeyDown);

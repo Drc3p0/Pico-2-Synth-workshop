@@ -415,13 +415,52 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 0 8px rgba(139, 92, 246, 0.3);
 }
 
-/* --- Transport buttons (loop, drone) --- */
+/* --- Transport buttons (loop, arp) --- */
 .transport-buttons {
   display: flex;
   gap: 0.5rem;
 }
 
-.drone-speed-label {
+/* Tonality toggle (Major/Minor) */
+.btn-tonality {
+  min-width: 60px;
+  text-align: center;
+}
+
+.btn-tonality.disabled {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+.btn-tonality.active {
+  border-color: #f59e0b;
+  background: rgba(245, 158, 11, 0.15);
+  color: #f59e0b;
+}
+
+/* Update Pico button */
+.btn-update-pico {
+  background: #059669;
+  color: #fff;
+}
+
+.btn-update-pico:hover:not(:disabled) {
+  background: #10b981;
+}
+
+.btn-update-pico:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-update-pico.sending {
+  background: #f59e0b;
+  color: #000;
+  animation: pulse-recording 1s ease-in-out infinite;
+}
+
+.speed-label {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -431,8 +470,8 @@ input[type="range"]::-moz-range-thumb {
   min-width: 180px;
 }
 
-.drone-speed-label input[type="range"] { flex: 1; min-width: 80px; }
-.drone-speed-label span { color: var(--primary-light); font-weight: 600; min-width: 32px; }
+.speed-label input[type="range"] { flex: 1; min-width: 80px; }
+.speed-label span { color: var(--primary-light); font-weight: 600; min-width: 32px; }
 
 .btn-transport {
   padding: 0.4rem 0.85rem;
@@ -649,12 +688,52 @@ select:focus, input[type="number"]:focus, input[type="text"]:focus {
   background: #0A0A14;
   padding: 0.6rem 1rem;
   border-bottom: 1px solid #2A2A40;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .code-header .filename {
   font-family: "SF Mono", "Fira Code", "Consolas", monospace;
   font-size: 0.8rem;
   color: #6C7086;
+}
+
+.code-format-toggle {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.btn-fmt {
+  padding: 0.3rem 0.7rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: #8888AA;
+  font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.btn-fmt:hover {
+  background: rgba(139, 92, 246, 0.1);
+  color: #C0C0E0;
+}
+
+.btn-fmt.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+.code-format-desc {
+  font-size: 0.78rem;
+  color: #8888AA;
+  padding: 0.5rem 1rem 0;
+  margin: 0;
 }
 
 .code-actions { display: flex; gap: 0.5rem; }

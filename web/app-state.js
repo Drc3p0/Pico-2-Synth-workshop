@@ -28,8 +28,8 @@ var AppState = (function () {
   var FX_TARGETS = [
     "filterFreq", "echoMix", "echoDelay", "echoDecay",
     "reverbMix", "reverbRoom", "distMix", "distDrive",
-    "vibratoDepth", "vibratoRate", "attack", "decay",
-    "sustain", "release", "volume", "droneSpeed",
+    "vibratoDepth", "vibratoRate", "attack",
+    "release", "volume",
   ];
 
   var FX_TARGET_LABELS = {
@@ -44,11 +44,8 @@ var AppState = (function () {
     vibratoDepth: "Vibrato Depth",
     vibratoRate: "Vibrato Rate",
     attack: "Attack",
-    decay: "Decay",
-    sustain: "Sustain",
     release: "Release",
     volume: "Volume",
-    droneSpeed: "Drone Speed",
   };
 
   // --- State ---------------------------------------------------------------
@@ -56,7 +53,9 @@ var AppState = (function () {
   var state = {
     // Voice / scale / tuning
     voiceIndex: 0,
-    scale: "pentatonic",
+    scaleBase: "pentatonic",
+    tonality: "major",          // "major" or "minor"
+    scale: "pentatonic_major",  // resolved key into SynthEngine.SCALES
     octave: 3,
     baseNote: 48,
 
@@ -129,6 +128,12 @@ var AppState = (function () {
 
   function set(key, value) {
     state[key] = value;
+    // Auto-resolve the scale key when base or tonality changes
+    if (key === "scaleBase" || key === "tonality") {
+      state.scale = SynthEngine.resolveScaleKey(state.scaleBase, state.tonality);
+      emit("change", { key: "scale", value: state.scale });
+      emit("change:scale", state.scale);
+    }
     emit("change", { key: key, value: value });
     emit("change:" + key, value);
   }
@@ -239,18 +244,16 @@ var AppState = (function () {
     vibratoDepth: "vibrato_depth",
     vibratoRate: "vibrato_rate",
     attack: "attack",
-    decay: "release",  // note: firmware uses release for decay target
-    sustain: "none",   // no direct firmware target for sustain
     release: "release",
     volume: "volume",
-    droneSpeed: "none",
   };
 
-  // --- Generate firmware CONFIG dict ---------------------------------------
+  // --- Shared config data builder ------------------------------------------
+  // Builds the raw config object used by both code.py and config.json
 
-  function generateFirmwareConfig() {
+  function _buildConfigData() {
     var s = state;
-    var scaleIntervals = SynthEngine.SCALES[s.scale] || SynthEngine.SCALES.pentatonic;
+    var scaleIntervals = SynthEngine.SCALES[s.scale] || SynthEngine.SCALES.pentatonic_major;
 
     // Collect assigned button and touch pins/notes
     var buttonPins = [], buttonNotes = [];
@@ -280,7 +283,7 @@ var AppState = (function () {
         var pinKey = String(fa.pin);
         if (!seenPins[pinKey]) {
           seenPins[pinKey] = true;
-          analogInputs.push({ pin: fa.pin, controls: fwTarget });
+          analogInputs.push({ pin: fa.pin, controls: fwTarget, alpha: 0.15 });
         }
       }
     }
@@ -298,6 +301,55 @@ var AppState = (function () {
       else if (fa2.source === "accel_shake") accelShake = fw2;
     }
 
+    var cfg = {
+      audio_pin: s.audioPin,
+      start_voice: s.voiceIndex,
+      scale: scaleIntervals,
+      base_note: baseNote,
+    };
+    if (buttonPins.length > 0) {
+      cfg.button_pins = buttonPins;
+      cfg.button_notes = buttonNotes;
+    }
+    if (touchPins.length > 0) {
+      cfg.touch_pins = touchPins;
+      cfg.touch_notes = touchNotes;
+    }
+    cfg.voice_button_pin = s.voiceButtonPin;
+    cfg.led_mode = s.ledMode;
+    if (s.ledMode === "neopixel") {
+      cfg.neopixel_pin = s.neopixelPin;
+    } else {
+      cfg.rgb_pins = s.rgbPins;
+    }
+    cfg.led_brightness = parseFloat(s.ledBrightness.toFixed(2));
+    cfg.analog_inputs = analogInputs;
+    cfg.i2c_sda = s.i2cSda;
+    cfg.i2c_scl = s.i2cScl;
+    cfg.tof_controls = tofControls;
+    cfg.accel_x_controls = accelX;
+    cfg.accel_y_controls = accelY;
+    cfg.accel_shake_controls = accelShake;
+
+    return cfg;
+  }
+
+  // --- Generate config.json ------------------------------------------------
+  // Pure JSON that gets saved to /config.json on the CIRCUITPY drive.
+  // The firmware's code.py reads this and merges with defaults.
+
+  function generateConfigJSON() {
+    return JSON.stringify(_buildConfigData(), null, 2) + "\n";
+  }
+
+  // --- Generate standalone code.py -----------------------------------------
+  // A self-contained code.py with CONFIG hardcoded inline.
+  // No config.json dependency -- students can read and edit the Python directly.
+
+  function generateFirmwareConfig() {
+    var cfg = _buildConfigData();
+    var s = state;
+
     var lines = [];
     lines.push("# ============================================================");
     lines.push("# PICO 2 SYNTH WORKSHOP -- Edit your settings below, then save!");
@@ -305,45 +357,46 @@ var AppState = (function () {
     lines.push("# ============================================================");
     lines.push("");
     lines.push("CONFIG = {");
-    lines.push('    "audio_pin": ' + s.audioPin + ',');
-    lines.push('    "start_voice": ' + s.voiceIndex + ',');
-    lines.push('    "scale": ' + JSON.stringify(scaleIntervals) + ',');
-    lines.push('    "base_note": ' + baseNote + ',');
+    lines.push('    "audio_pin": ' + cfg.audio_pin + ',');
+    lines.push('    "start_voice": ' + cfg.start_voice + ',');
+    lines.push('    "scale": ' + JSON.stringify(cfg.scale) + ',');
+    lines.push('    "base_note": ' + cfg.base_note + ',');
     lines.push("");
 
-    if (buttonPins.length > 0) {
-      lines.push('    "button_pins": [' + buttonPins.join(", ") + '],');
-      lines.push('    "button_notes": [' + buttonNotes.join(", ") + '],');
+    if (cfg.button_pins) {
+      lines.push('    "button_pins": [' + cfg.button_pins.join(", ") + '],');
+      lines.push('    "button_notes": [' + cfg.button_notes.join(", ") + '],');
     }
-    if (touchPins.length > 0) {
-      lines.push('    "touch_pins": [' + touchPins.join(", ") + '],');
-      lines.push('    "touch_notes": [' + touchNotes.join(", ") + '],');
+    if (cfg.touch_pins) {
+      lines.push('    "touch_pins": [' + cfg.touch_pins.join(", ") + '],');
+      lines.push('    "touch_notes": [' + cfg.touch_notes.join(", ") + '],');
     }
 
-    lines.push('    "voice_button_pin": ' + s.voiceButtonPin + ',');
+    lines.push('    "voice_button_pin": ' + cfg.voice_button_pin + ',');
     lines.push("");
-    lines.push('    "led_mode": "' + s.ledMode + '",');
-    if (s.ledMode === "neopixel") {
-      lines.push('    "neopixel_pin": ' + s.neopixelPin + ',');
-    } else {
-      lines.push('    "rgb_pins": [' + s.rgbPins.join(", ") + '],');
+    lines.push('    "led_mode": "' + cfg.led_mode + '",');
+    if (cfg.neopixel_pin !== undefined) {
+      lines.push('    "neopixel_pin": ' + cfg.neopixel_pin + ',');
     }
-    lines.push('    "led_brightness": ' + s.ledBrightness.toFixed(2) + ',');
+    if (cfg.rgb_pins) {
+      lines.push('    "rgb_pins": [' + cfg.rgb_pins.join(", ") + '],');
+    }
+    lines.push('    "led_brightness": ' + cfg.led_brightness.toFixed(2) + ',');
     lines.push("");
 
     lines.push('    "analog_inputs": [');
-    for (var a = 0; a < analogInputs.length; a++) {
-      var ai = analogInputs[a];
+    for (var a = 0; a < cfg.analog_inputs.length; a++) {
+      var ai = cfg.analog_inputs[a];
       lines.push('        {"pin": ' + ai.pin + ', "controls": "' + ai.controls + '", "alpha": 0.15},');
     }
     lines.push('    ],');
     lines.push("");
-    lines.push('    "i2c_sda": ' + s.i2cSda + ',');
-    lines.push('    "i2c_scl": ' + s.i2cScl + ',');
-    lines.push('    "tof_controls": "' + tofControls + '",');
-    lines.push('    "accel_x_controls": "' + accelX + '",');
-    lines.push('    "accel_y_controls": "' + accelY + '",');
-    lines.push('    "accel_shake_controls": "' + accelShake + '",');
+    lines.push('    "i2c_sda": ' + cfg.i2c_sda + ',');
+    lines.push('    "i2c_scl": ' + cfg.i2c_scl + ',');
+    lines.push('    "tof_controls": "' + cfg.tof_controls + '",');
+    lines.push('    "accel_x_controls": "' + cfg.accel_x_controls + '",');
+    lines.push('    "accel_y_controls": "' + cfg.accel_y_controls + '",');
+    lines.push('    "accel_shake_controls": "' + cfg.accel_shake_controls + '",');
     lines.push("}");
     lines.push("");
     lines.push("# ============================================================");
@@ -385,5 +438,6 @@ var AppState = (function () {
     setFxAssignment: setFxAssignment,
 
     generateFirmwareConfig: generateFirmwareConfig,
+    generateConfigJSON: generateConfigJSON,
   };
 })();

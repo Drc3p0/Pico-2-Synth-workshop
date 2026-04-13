@@ -1,7 +1,7 @@
 """Pico 2 Synth Engine -- feature-packed, student-configurable.
 
 Supports:
-  - 13 built-in voices (core synth, leads/basses, drum kit, noise, drone/ambient),
+  - 12 built-in voices (core synth, leads/basses, drum kit, noise, drone/ambient),
     cycled with a dedicated button
   - Drum kit voice: each key triggers a different drum sound
   - LED voice indicator (NeoPixel or RGB)
@@ -17,6 +17,22 @@ import time
 board = __import__("board")
 audiopwmio = __import__("audiopwmio")
 synthio = __import__("synthio")
+
+# USB serial for web interface communication
+try:
+    import usb_cdc
+    _serial = usb_cdc.console
+except Exception:
+    _serial = None
+
+# Config storage for save-to-flash
+try:
+    save_config = __import__("lib.config_store", None, None, ("save_config",), 0).save_config
+except Exception:
+    try:
+        save_config = __import__("config_store", None, None, ("save_config",), 0).save_config
+    except Exception:
+        save_config = None
 
 
 def _load_symbol(module_names, symbol_name):
@@ -683,16 +699,261 @@ class SynthEngine:
             self._apply_target(self.accel_shake_controls, self.accel.shake)
 
     # -----------------------------------------------------------------------
+    # Serial communication (web interface)
+    # -----------------------------------------------------------------------
+
+    def _serial_available(self):
+        """Check if serial data is waiting (non-blocking)."""
+        if _serial is None:
+            return False
+        try:
+            return _serial.in_waiting > 0
+        except Exception:
+            return False
+
+    def _serial_readline(self):
+        """Read one line from serial (non-blocking, returns None if no data)."""
+        if _serial is None:
+            return None
+        try:
+            if _serial.in_waiting > 0:
+                raw = _serial.readline()
+                if raw:
+                    return raw.decode("utf-8", "ignore").strip()
+        except Exception:
+            pass
+        return None
+
+    def _serial_send(self, msg):
+        """Send a line to the web interface."""
+        try:
+            print(msg)
+        except Exception:
+            pass
+
+    def _process_serial(self):
+        """Process all pending serial commands (non-blocking)."""
+        # Process up to 5 commands per tick to avoid blocking audio
+        for _ in range(5):
+            line = self._serial_readline()
+            if line is None:
+                break
+            self._handle_serial_command(line)
+
+    def _handle_serial_command(self, cmd):
+        """Parse and execute a serial command from the web interface."""
+
+        # CMD:CONNECTED -- web interface connected
+        if cmd == "CMD:CONNECTED":
+            self._web_connected = True
+            self._serial_send("ACK:CONNECTED")
+            self._led_connected_animation()
+            return
+
+        # CMD:DISCONNECTED -- web interface disconnecting
+        if cmd == "CMD:DISCONNECTED":
+            self._web_connected = False
+            self._serial_send("ACK:DISCONNECTED")
+            return
+
+        # CMD:PING -- heartbeat
+        if cmd == "CMD:PING":
+            self._serial_send("ACK:PONG")
+            return
+
+        # SAVE -- write current config to flash
+        if cmd == "SAVE":
+            if save_config is not None:
+                ok = save_config(self.config)
+                self._serial_send("ACK:SAVED" if ok else "ERR:SAVE_FAILED")
+            else:
+                self._serial_send("ERR:NO_STORAGE")
+            return
+
+        # GET:CONFIG -- send current config as JSON
+        if cmd == "GET:CONFIG":
+            try:
+                import json
+                self._serial_send("CONFIG:" + json.dumps(self.config))
+            except Exception:
+                self._serial_send("ERR:JSON")
+            return
+
+        # SET:<key>:<value> -- live parameter update
+        if cmd.startswith("SET:"):
+            parts = cmd.split(":", 2)
+            if len(parts) == 3:
+                self._apply_serial_set(parts[1], parts[2])
+            return
+
+        # VOICE:<index> -- switch voice
+        if cmd.startswith("VOICE:"):
+            try:
+                idx = int(cmd.split(":")[1])
+                self._switch_voice(idx)
+                self._serial_send("ACK:VOICE:" + str(self.voice_index))
+            except Exception:
+                pass
+            return
+
+    def _apply_serial_set(self, key, value):
+        """Apply a live SET command, updating config and engine state."""
+        try:
+            # Map web parameter names to firmware config keys and apply
+            if key == "filterFreq":
+                freq = clamp(float(value), 50.0, 2000.0)
+                self._set_filter_frequency(freq)
+                self._serial_send("ACK:SET:" + key)
+            elif key == "echoMix":
+                if self.effects:
+                    self.effects.set_echo_mix(clamp(float(value), 0.0, 1.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "echoDelay":
+                if self.effects:
+                    self.effects.set_echo_delay_ms(clamp(float(value), 70.0, 800.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "echoDecay":
+                if self.effects:
+                    self.effects.set_echo_decay(clamp(float(value), 0.0, 1.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "reverbMix":
+                if self.effects:
+                    self.effects.set_reverb_mix(clamp(float(value), 0.0, 1.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "reverbRoom":
+                if self.effects:
+                    self.effects.set_reverb_roomsize(clamp(float(value), 0.0, 1.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "distMix":
+                if self.effects:
+                    self.effects.set_distortion_mix(clamp(float(value), 0.0, 1.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "distDrive":
+                if self.effects:
+                    self.effects.set_distortion_drive(clamp(float(value), 0.0, 1.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "vibratoDepth":
+                self._set_vibrato_depth(clamp(float(value), 0.0, 0.5))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "vibratoRate":
+                self._set_vibrato_rate(clamp(float(value), 0.0, 13.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "volume":
+                self._set_master_volume(clamp(float(value), 0.0, 1.0))
+                self._serial_send("ACK:SET:" + key)
+            elif key == "scale":
+                try:
+                    import json
+                    self.scale = self._validate_scale(json.loads(value))
+                    self.config["scale"] = self.scale
+                except Exception:
+                    pass
+                self._serial_send("ACK:SET:" + key)
+            elif key == "base_note":
+                self.base_note = self._to_int(value, DEFAULT_BASE_NOTE)
+                self.config["base_note"] = self.base_note
+                self._serial_send("ACK:SET:" + key)
+            elif key == "start_voice":
+                idx = self._to_int(value, 0)
+                self._switch_voice(idx)
+                self.config["start_voice"] = self.voice_index
+                self._serial_send("ACK:SET:" + key)
+            else:
+                # Store arbitrary config key for save-to-flash
+                try:
+                    import json
+                    self.config[key] = json.loads(value)
+                except Exception:
+                    self.config[key] = value
+                self._serial_send("ACK:SET:" + key)
+        except Exception as e:
+            self._serial_send("ERR:SET:" + key + ":" + str(e))
+
+    def _report_input_event(self, event_type, index, pressed):
+        """Report a button/touch event to the web interface."""
+        if not self._web_connected:
+            return
+        prefix = "B" if event_type == "button" else "T"
+        self._serial_send(prefix + str(index) + ":" + ("1" if pressed else "0"))
+
+    def _report_analog_event(self, pin, value):
+        """Report an analog value to the web interface."""
+        if not self._web_connected:
+            return
+        self._serial_send("A" + str(pin) + ":" + str(round(value, 3)))
+
+    def _report_accel_event(self):
+        """Report accelerometer values to the web interface."""
+        if not self._web_connected:
+            return
+        if self.accel is None or not self.accel.available:
+            return
+        try:
+            self._serial_send("TX:" + str(round(self.accel.tilt_x, 2)))
+            self._serial_send("TY:" + str(round(self.accel.tilt_y, 2)))
+            if self.accel.shake > 0.05:
+                self._serial_send("SH:" + str(round(self.accel.shake, 2)))
+        except Exception:
+            pass
+
+    def _report_tof_event(self):
+        """Report ToF value to the web interface."""
+        if not self._web_connected:
+            return
+        if self.tof is None or not self.tof.available:
+            return
+        try:
+            val = self.tof.normalized()
+            if val is not None:
+                self._serial_send("TOF:" + str(round(val, 3)))
+        except Exception:
+            pass
+
+    def _led_connected_animation(self):
+        """Play a rainbow chase on the LED to indicate web connection."""
+        if self.led is None:
+            return
+        try:
+            import math
+            for i in range(30):
+                hue = (i * 12) % 360
+                r = max(0, min(255, int(abs(hue / 60.0 - 3) * 255 - 255)))
+                g = max(0, min(255, int(-(abs(hue / 60.0 - 2) * 255 - 255))))
+                b = max(0, min(255, int(-(abs(hue / 60.0 - 4) * 255 - 255))))
+                self.led.set_rgb(r, g, b)
+                time.sleep(0.04)
+            # Green = connected
+            self.led.set_rgb(0, 60, 20)
+        except Exception:
+            pass
+
+    # -----------------------------------------------------------------------
     # Main loop
     # -----------------------------------------------------------------------
 
     def run(self):
+        self._web_connected = False
+        self._serial_report_tick = 0
+
+        # Announce readiness
+        self._serial_send("READY")
+
         while True:
+            # Process serial commands from web interface
+            self._process_serial()
+
+            # Standard input polling
             self._apply_voice_button()
             self._apply_buttons()
             self._apply_touch()
             self._apply_analog()
             self._apply_tof()
             self._apply_accel()
+
+            # Report sensor values to web interface (throttled)
+            self._serial_report_tick += 1
+            if self._web_connected and self._serial_report_tick % 10 == 0:
+                self._report_accel_event()
+                self._report_tof_event()
 
             time.sleep(0.005)

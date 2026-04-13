@@ -215,6 +215,8 @@ var ConfigGenerator = (function () {
 
   // --- Code generation (uses AppState) -------------------------------------
 
+  var currentFormat = "codepy";  // "codepy" or "configjson"
+
   function highlightPython(code) {
     var lines = code.split("\n");
     var result = [];
@@ -237,14 +239,62 @@ var ConfigGenerator = (function () {
     return result.join("\n");
   }
 
+  function highlightJSON(code) {
+    var lines = code.split("\n");
+    var result = [];
+    for (var i = 0; i < lines.length; i++) {
+      var line = escapeHtml(lines[i]);
+      // Highlight keys ("key":)
+      line = line.replace(/"([^"]*)"\s*:/g, '<span class="syn-key">"$1"</span>:');
+      // Highlight string values (: "value")
+      line = line.replace(/:\s*"([^"]*)"/g, ': <span class="syn-string">"$1"</span>');
+      // Highlight numbers
+      line = line.replace(/([\[,: ])(-?\d+\.?\d*)/g, '$1<span class="syn-number">$2</span>');
+      // Highlight true/false/null
+      line = line.replace(/\b(true|false|null)\b/g, '<span class="syn-keyword">$1</span>');
+      result.push(line);
+    }
+    return result.join("\n");
+  }
+
+  function setFormat(fmt) {
+    currentFormat = fmt;
+    updateCode();
+    // Update toggle button active states
+    var btnCodePy = document.getElementById("btn-fmt-codepy");
+    var btnConfig = document.getElementById("btn-fmt-configjson");
+    if (btnCodePy) btnCodePy.classList.toggle("active", fmt === "codepy");
+    if (btnConfig) btnConfig.classList.toggle("active", fmt === "configjson");
+    // Update filename label
+    var fnLabel = document.querySelector(".filename");
+    if (fnLabel) fnLabel.textContent = fmt === "codepy" ? "code.py" : "config.json";
+    // Update download button text
+    var dlBtn = document.getElementById("btn-download");
+    if (dlBtn) dlBtn.textContent = fmt === "codepy" ? "Download code.py" : "Download config.json";
+    // Update description
+    var desc = document.getElementById("code-format-desc");
+    if (desc) {
+      desc.textContent = fmt === "codepy"
+        ? "Standalone file with all settings hardcoded. Copy to CIRCUITPY as code.py -- no other files needed."
+        : "Settings file read by the firmware on boot. Copy to CIRCUITPY alongside the default code.py and lib/ folder.";
+    }
+  }
+
   function updateCode() {
     var pre = document.getElementById("code-preview");
     if (!pre) return;
-    var code = AppState.generateFirmwareConfig();
-    pre.innerHTML = highlightPython(code);
+    if (currentFormat === "configjson") {
+      var json = AppState.generateConfigJSON();
+      pre.innerHTML = highlightJSON(json);
+    } else {
+      var code = AppState.generateFirmwareConfig();
+      pre.innerHTML = highlightPython(code);
+    }
   }
 
   function getRawCode() { return AppState.generateFirmwareConfig(); }
+  function getRawConfigJSON() { return AppState.generateConfigJSON(); }
+  function getFormat() { return currentFormat; }
 
   // --- Render everything ---------------------------------------------------
 
@@ -305,5 +355,8 @@ var ConfigGenerator = (function () {
     renderPinoutSVG: renderPinoutSVG,
     updateCode: updateCode,
     getRawCode: getRawCode,
+    getRawConfigJSON: getRawConfigJSON,
+    getFormat: getFormat,
+    setFormat: setFormat,
   };
 })();
