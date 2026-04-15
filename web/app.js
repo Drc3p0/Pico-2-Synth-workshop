@@ -373,17 +373,19 @@
   // --- Init ----------------------------------------------------------------
 
   function init() {
-    // Unlock Web Audio on first user interaction (mobile browsers block audio
-    // until a user gesture has triggered AudioContext.resume + buffer playback)
+    // iOS Safari only grants user-activation on touchend/pointerup (not
+    // touchstart/pointerdown). Listen on the qualifying events so the
+    // AudioContext is unlocked before the user reaches the keyboard.
+    var _unlockEvents = ["touchend", "pointerup", "click", "keydown"];
     function _unlockOnce() {
       SynthEngine.unlockAudio();
-      document.removeEventListener("touchstart", _unlockOnce, true);
-      document.removeEventListener("touchend", _unlockOnce, true);
-      document.removeEventListener("click", _unlockOnce, true);
+      for (var i = 0; i < _unlockEvents.length; i++) {
+        document.removeEventListener(_unlockEvents[i], _unlockOnce, true);
+      }
     }
-    document.addEventListener("touchstart", _unlockOnce, true);
-    document.addEventListener("touchend", _unlockOnce, true);
-    document.addEventListener("click", _unlockOnce, true);
+    for (var u = 0; u < _unlockEvents.length; u++) {
+      document.addEventListener(_unlockEvents[u], _unlockOnce, true);
+    }
 
     // Tab buttons
     var tabs = document.querySelectorAll(".tab");

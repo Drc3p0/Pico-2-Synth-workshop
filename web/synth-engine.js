@@ -300,18 +300,17 @@ var SynthEngine = (function () {
   var INTERNAL_GAIN = 0.28;
 
   var _audioUnlocked = false;
+  var _iosAudioEl = null;
 
-  // Mobile browsers require AudioContext.resume() during a user gesture.
-  // This function creates the context (if needed), resumes it, and plays a
-  // silent buffer to satisfy iOS Safari's stricter autoplay policy.
-  // Call from any touchstart/click handler to guarantee audio works.
   function unlockAudio() {
     if (_audioUnlocked && ctx && ctx.state === "running") return;
     ensureContext();
     if (ctx.state === "suspended") {
       ctx.resume();
     }
-    // iOS Safari needs an actual buffer played during a gesture to unlock audio
+    if (_iosAudioEl && _iosAudioEl.paused) {
+      _iosAudioEl.play().catch(function() {});
+    }
     var buf = ctx.createBuffer(1, 1, ctx.sampleRate);
     var src = ctx.createBufferSource();
     src.buffer = buf;
@@ -387,6 +386,19 @@ var SynthEngine = (function () {
     dryGain.connect(masterGain);
     reverbGain.connect(masterGain);
     masterGain.connect(limiterNode);
+
+    // On iOS, the hardware mute switch silences Web Audio routed to
+    // ctx.destination. Routing through MediaStreamDestination into an
+    // <audio> element makes iOS treat it as media playback, bypassing
+    // the mute switch. The <audio>.play() call is deferred to
+    // unlockAudio() where it runs during a qualifying user gesture.
+    if (ctx.createMediaStreamDestination) {
+      var msd = ctx.createMediaStreamDestination();
+      limiterNode.connect(msd);
+      _iosAudioEl = document.createElement("audio");
+      _iosAudioEl.srcObject = msd.stream;
+      _iosAudioEl.setAttribute("playsinline", "");
+    }
     limiterNode.connect(ctx.destination);
 
     // Build periodic waves for all voices
@@ -747,9 +759,11 @@ var SynthEngine = (function () {
 
     ensureContext: ensureContext,
     unlockAudio: unlockAudio,
+    needsUnlock: function() { return !ctx || ctx.state !== "running"; },
     noteOn: noteOn,
     noteOff: noteOff,
     allNotesOff: allNotesOff,
+    isNoteActive: function(midi) { return !!activeNotes[midi]; },
 
     setVoice: setVoice,
     nextVoice: nextVoice,

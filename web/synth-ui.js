@@ -116,11 +116,25 @@ var SynthUI = (function () {
           SynthEngine.noteOn(midi, idx);
           el.classList.add("pressed");
         });
+        // iOS Safari grants user-activation on pointerup/touchend, not
+        // pointerdown. If this is the first interaction and the context
+        // was still suspended during pointerdown, unlock now and replay.
         el.addEventListener("pointerup", function (e) {
           e.preventDefault();
           var midi = parseInt(el.getAttribute("data-midi"));
-          SynthEngine.noteOff(midi);
-          el.classList.remove("pressed");
+          if (SynthEngine.needsUnlock()) {
+            var idx = parseInt(el.getAttribute("data-index"));
+            SynthEngine.unlockAudio();
+            SynthEngine.noteOff(midi);
+            SynthEngine.noteOn(midi, idx);
+            setTimeout(function () {
+              SynthEngine.noteOff(midi);
+              el.classList.remove("pressed");
+            }, 200);
+          } else {
+            SynthEngine.noteOff(midi);
+            el.classList.remove("pressed");
+          }
         });
         el.addEventListener("pointerleave", function (e) {
           var midi = parseInt(el.getAttribute("data-midi"));
