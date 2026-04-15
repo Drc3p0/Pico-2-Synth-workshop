@@ -373,6 +373,18 @@
   // --- Init ----------------------------------------------------------------
 
   function init() {
+    // Unlock Web Audio on first user interaction (mobile browsers block audio
+    // until a user gesture has triggered AudioContext.resume + buffer playback)
+    function _unlockOnce() {
+      SynthEngine.unlockAudio();
+      document.removeEventListener("touchstart", _unlockOnce, true);
+      document.removeEventListener("touchend", _unlockOnce, true);
+      document.removeEventListener("click", _unlockOnce, true);
+    }
+    document.addEventListener("touchstart", _unlockOnce, true);
+    document.addEventListener("touchend", _unlockOnce, true);
+    document.addEventListener("click", _unlockOnce, true);
+
     // Tab buttons
     var tabs = document.querySelectorAll(".tab");
     for (var i = 0; i < tabs.length; i++) {

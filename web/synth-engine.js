@@ -299,6 +299,28 @@ var SynthEngine = (function () {
   // All oscillators are summed through this gain before the FX chain.
   var INTERNAL_GAIN = 0.28;
 
+  var _audioUnlocked = false;
+
+  // Mobile browsers require AudioContext.resume() during a user gesture.
+  // This function creates the context (if needed), resumes it, and plays a
+  // silent buffer to satisfy iOS Safari's stricter autoplay policy.
+  // Call from any touchstart/click handler to guarantee audio works.
+  function unlockAudio() {
+    if (_audioUnlocked && ctx && ctx.state === "running") return;
+    ensureContext();
+    if (ctx.state === "suspended") {
+      ctx.resume();
+    }
+    // iOS Safari needs an actual buffer played during a gesture to unlock audio
+    var buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+    var src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.connect(ctx.destination);
+    src.start(0);
+    src.stop(ctx.currentTime + 0.001);
+    _audioUnlocked = true;
+  }
+
   function ensureContext() {
     if (ctx) return;
     ctx = new (window.AudioContext || window.webkitAudioContext)();
@@ -449,8 +471,7 @@ var SynthEngine = (function () {
   // --- Note on/off ---------------------------------------------------------
 
   function noteOn(midi, keyIndex) {
-    ensureContext();
-    if (ctx.state === "suspended") ctx.resume();
+    unlockAudio();
     if (activeNotes[midi]) return;
 
     if (loopRecording) {
@@ -647,8 +668,7 @@ var SynthEngine = (function () {
   function getArpSpeed() { return arpSpeed; }
 
   function startArp(scaleName, baseNote) {
-    ensureContext();
-    if (ctx.state === "suspended") ctx.resume();
+    unlockAudio();
     stopArp();
     arpActive = true;
     arpIndex = 0;
@@ -726,6 +746,7 @@ var SynthEngine = (function () {
     scaleHasPair: scaleHasPair,
 
     ensureContext: ensureContext,
+    unlockAudio: unlockAudio,
     noteOn: noteOn,
     noteOff: noteOff,
     allNotesOff: allNotesOff,
